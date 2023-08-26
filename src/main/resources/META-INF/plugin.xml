@@ -1,0 +1,37 @@
+<idea-plugin>
+    <id>cc.polyfrost.sorbet.intelliprocessor</id>
+    <name>IntelliProcessor</name>
+    <vendor url="https://polyfrost.cc">Polyfrost</vendor>
+
+    <description><![CDATA[
+    An IntelliJ plugin to add support for
+    <a href="https://github.com/ReplayMod/preprocessor">preprocessor syntax</a>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <highlightVisitor
+                implementation="cc.polyfrost.sorbet.intelliprocessor.PreprocessorHighlight"
+        />
+        <enterHandlerDelegate
+                implementation="cc.polyfrost.sorbet.intelliprocessor.PreprocessorExtend"
+        />
+        <lang.importOptimizer
+                language="JAVA"
+                implementationClass="cc.polyfrost.sorbet.intelliprocessor.PreprocessorImport"
+                order="first"
+        />
+        <lang.foldingBuilder
+                language="JAVA"
+                implementationClass="cc.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
+                order="first"
+        />
+        <lang.foldingBuilder
+                language="kotlin"
+                implementationClass="cc.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
+                order="first"
+        />
+    </extensions>
+</idea-plugin>
