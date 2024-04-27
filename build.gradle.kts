@@ -4,17 +4,23 @@ plugins {
     id("java")
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intellij)
+    alias(libs.plugins.kotlinter)
 }
 
 group = properties("pluginGroup").get()
 version = properties("pluginVersion").get()
 
 repositories {
-    maven("https://repo.polyfrost.cc/releases")
+    maven("https://repo.polyfrost.org/releases")
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
+}
+
+kotlinter {
+    ignoreFailures = false
+    reporters = arrayOf("checkstyle", "plain")
 }
 
 intellij {

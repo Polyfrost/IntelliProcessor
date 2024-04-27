@@ -1,10 +1,10 @@
 <idea-plugin>
-    <id>cc.polyfrost.sorbet.intelliprocessor</id>
+    <id>org.polyfrost.sorbet.intelliprocessor</id>
     <name>IntelliProcessor</name>
-    <vendor url="https://polyfrost.cc">Polyfrost</vendor>
+    <vendor url="https://polyfrost.org">Polyfrost</vendor>
 
     <description><![CDATA[
-    An IntelliJ plugin to add support for
+    An IntelliJ IDEA plugin to add support for
     <a href="https://github.com/ReplayMod/preprocessor">preprocessor syntax</a>
     ]]></description>
 
@@ -13,24 +13,24 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <highlightVisitor
-                implementation="cc.polyfrost.sorbet.intelliprocessor.PreprocessorHighlight"
+                implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorHighlight"
         />
         <enterHandlerDelegate
-                implementation="cc.polyfrost.sorbet.intelliprocessor.PreprocessorExtend"
+                implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorExtend"
         />
         <lang.importOptimizer
                 language="JAVA"
-                implementationClass="cc.polyfrost.sorbet.intelliprocessor.PreprocessorImport"
+                implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorImport"
                 order="first"
         />
         <lang.foldingBuilder
                 language="JAVA"
-                implementationClass="cc.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
+                implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
                 order="first"
         />
         <lang.foldingBuilder
                 language="kotlin"
-                implementationClass="cc.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
+                implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
                 order="first"
         />
     </extensions>

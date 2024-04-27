@@ -1,0 +1,53 @@
+build:
+  maxIssues: 0
+  weights:
+    comments: 0
+
+style:
+  CanBeNonNullable:
+    active: true
+  CollapsibleIfStatements:
+    active: true
+  LibraryCodeMustSpecifyReturnType:
+    active: true
+  MagicNumber:
+    active: true
+    ignorePropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreEnums: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  MandatoryBracesIfStatements:
+    active: true
+  MandatoryBracesLoops:
+    active: true
+  NewLineAtEndOfFile:
+    active: true
+  UnusedImports:
+    active: true
+  UnusedPrivateMember:
+    active: true
+  UnusedPrivateClass:
+    active: true
+
+naming:
+  ClassNaming:
+    active: true
+  FunctionNaming:
+    active: true
+
+coroutines:
+  active: true
+  RedundantSuspendModifier:
+    active: true
+
+comments:
+  UndocumentedPublicClass:
+    active: true
+  UndocumentedPublicFunction:
+    active: true
+  UndocumentedPublicProperty:
+    active: true
+  EndOfSentenceFormat:
+    active: true
