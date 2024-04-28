@@ -3,11 +3,6 @@
     <name>IntelliProcessor</name>
     <vendor url="https://polyfrost.org">Polyfrost</vendor>
 
-    <description><![CDATA[
-    An IntelliJ IDEA plugin to add support for
-    <a href="https://github.com/ReplayMod/preprocessor">preprocessor syntax</a>
-    ]]></description>
-
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
