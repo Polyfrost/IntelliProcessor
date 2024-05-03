@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 ### Added
-- added meowing
+- Initial commit to IntelliProcessor IDEA plugin
 
 ### fixed
-- updated version
+- Updated IntelliJ version and refactored code
