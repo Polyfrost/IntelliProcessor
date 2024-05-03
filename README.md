@@ -1,8 +1,8 @@
 # IntelliProcessor
 
 ![Build](https://github.com/Polyfrost/IntelliProcessor/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/org.polyfrost.sorbet.intelliprocessor.svg)](https://plugins.jetbrains.com/plugin/org.polyfrost.sorbet.intelliprocessor)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/org.polyfrost.sorbet.intelliprocessor.svg)](https://plugins.jetbrains.com/plugin/org.polyfrost.sorbet.intelliprocessor)
+[![Version](https://img.shields.io/jetbrains/plugin/v/24289.svg)](https://plugins.jetbrains.com/plugin/24289)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/24289.svg)](https://plugins.jetbrains.com/plugin/24289)
 
 <!-- plugin description -->
 An IntelliJ plugin to add support for the ReplayMod [preprocessor syntax](https://github.com/ReplayMod/Preprocessor)
