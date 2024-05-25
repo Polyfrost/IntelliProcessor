@@ -28,5 +28,16 @@
                 implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
                 order="first"
         />
+		<notificationGroup displayType="BALLOON" id="Jump Failure" />
     </extensions>
+
+	<actions>
+
+		<action id="org.polyfrost.sorbet.intelliprocessor.PreprocessorFileJumpAction"
+				class="org.polyfrost.sorbet.intelliprocessor.PreprocessorFileJumpAction"
+				text="Jump To Pre-Processed File"
+				description="Jump from or to this file in the preprocessed source. Will not update those source files, so you might need to build your project to update those files.">
+			<add-to-group group-id="ToolsMenu" anchor="last"/>
+		</action>
+	</actions>
 </idea-plugin>
