@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add jump to/from preprocessed file action. You will need to manually assign a keybinding for this feature.
+
 ## [2.0.0] - 2024-05-03
 
 ### Added
