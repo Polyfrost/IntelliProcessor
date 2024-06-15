@@ -8,6 +8,10 @@
 
 - Add jump to/from preprocessed file action. You will need to manually assign a keybinding for this feature.
 
+### Fixed
+
+- Allowed hyphens as a valid Preprocessor `#if` identifier.
+
 ## [2.0.0] - 2024-05-03
 
 ### Added
