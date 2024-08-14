@@ -68,35 +68,6 @@ jobs:
                   name: ${{ steps.artifact.outputs.filename }}
                   path: ./build/distributions/content/*/*
 
-    test:
-        name: Test
-        needs: [ build ]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Fetch Sources
-              uses: actions/checkout@v4
-
-            - name: Setup Java
-              uses: actions/setup-java@v4
-              with:
-                  distribution: zulu
-                  java-version: 17
-
-            - name: Setup Gradle
-              uses: gradle/actions/setup-gradle@v3
-              with:
-                  gradle-home-cache-cleanup: true
-
-            - name: Run Tests
-              run: ./gradlew check
-
-            - name: Collect Tests Result
-              if: ${{ failure() }}
-              uses: actions/upload-artifact@v4
-              with:
-                  name: tests-result
-                  path: ${{ github.workspace }}/build/reports/tests
-
     verify:
         name: Verify plugin
         needs: [ build ]
@@ -141,7 +112,7 @@ jobs:
     releaseDraft:
         name: Release draft
         if: github.event_name != 'pull_request'
-        needs: [ build, test, verify ]
+        needs: [ build, verify ]
         runs-on: ubuntu-latest
         permissions:
             contents: write

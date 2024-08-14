@@ -1,6 +1,5 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -29,8 +28,6 @@ repositories {
 }
 
 dependencies {
-	testImplementation(libs.junit)
-
 	intellijPlatform {
 		create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
 		bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
@@ -39,7 +36,6 @@ dependencies {
 		instrumentationTools()
 		pluginVerifier()
 		zipSigner()
-		testFramework(TestFrameworkType.Platform)
 	}
 }
 

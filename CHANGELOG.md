@@ -11,6 +11,7 @@
 ### Fixed
 
 - Fixed formatting issues
+- Removed testing
 
 ## [2.1.0] - 2024-06-15
 
