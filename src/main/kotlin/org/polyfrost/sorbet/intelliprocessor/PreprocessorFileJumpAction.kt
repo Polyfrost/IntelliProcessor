@@ -19,7 +19,11 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.readText
+import kotlin.io.path.relativeToOrNull
 
 class PreprocessorFileJumpAction : DumbAwareAction() {
 	private fun getMainProjectVersion(rootDirectory: Path): String? {

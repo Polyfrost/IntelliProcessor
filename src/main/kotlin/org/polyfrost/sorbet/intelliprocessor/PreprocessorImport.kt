@@ -4,7 +4,11 @@ import com.intellij.lang.ImportOptimizer
 import com.intellij.lang.LanguageImportStatements
 import com.intellij.lang.java.JavaImportOptimizer
 import com.intellij.openapi.util.EmptyRunnable
-import com.intellij.psi.*
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiImportList
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.codeStyle.JavaCodeStyleManager
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 

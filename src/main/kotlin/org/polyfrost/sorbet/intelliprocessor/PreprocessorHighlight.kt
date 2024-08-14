@@ -19,7 +19,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import com.intellij.refactoring.suggested.endOffset
-import java.util.*
+import java.util.ArrayDeque
+import java.util.Locale
 
 class PreprocessorHighlight(private val project: Project) : HighlightVisitor, DumbAware {
 	private lateinit var holder: HighlightInfoHolder
