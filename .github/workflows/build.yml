@@ -20,9 +20,6 @@ jobs:
             - name: Fetch Sources
               uses: actions/checkout@v4
 
-            - name: Gradle Wrapper Validation
-              uses: gradle/actions/wrapper-validation@v3
-
             - name: Setup Java
               uses: actions/setup-java@v4
               with:
@@ -32,8 +29,14 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v3
               with:
+                  add-job-summary-as-pr-comment: always
+                  add-job-summary: always
+                  build-scan-publish: true
+                  build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+                  build-scan-terms-of-use-agree: "yes"
                   gradle-home-cache-cleanup: true
-
+                  validate-wrappers: true
+                  
             - name: Export Properties
               id: properties
               shell: bash
@@ -91,13 +94,19 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v3
               with:
+                  add-job-summary-as-pr-comment: always
+                  add-job-summary: always
+                  build-scan-publish: true
+                  build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+                  build-scan-terms-of-use-agree: "yes"
                   gradle-home-cache-cleanup: true
+                  validate-wrappers: true
 
             - name: Setup Plugin Verifier IDEs Cache
               uses: actions/cache@v4
               with:
                   path: ${{ needs.build.outputs.pluginVerifierHomeDir }}/ides
-                  key: plugin-verifier-${{ hashFiles('build/listProductsReleases.txt') }}
+                  key: plugin-verifier-v0-${{ hashFiles('build/listProductsReleases.txt') }}
 
             - name: Run Plugin Verification tasks
               run: ./gradlew verifyPlugin -Dplugin.verifier.home.dir=${{ needs.build.outputs.pluginVerifierHomeDir }}
