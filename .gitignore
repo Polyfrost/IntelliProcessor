@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/java,gradle,forgegradle,kotlin,macos,intellij,intellij+all,eclipse,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=java,gradle,forgegradle,kotlin,macos,intellij,intellij+all,eclipse,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/java,macos,gradle,kotlin,eclipse,intellij,forgegradle,intellij+all,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=java,macos,gradle,kotlin,eclipse,intellij,forgegradle,intellij+all,visualstudiocode
 
 ### Eclipse ###
 .metadata
@@ -81,6 +81,7 @@ run/
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.intellijPlatform
 
 # AWS User-specific
 .idea/**/aws.xml
@@ -360,4 +361,4 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
-# End of https://www.toptal.com/developers/gitignore/api/java,gradle,forgegradle,kotlin,macos,intellij,intellij+all,eclipse,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/java,macos,gradle,kotlin,eclipse,intellij,forgegradle,intellij+all,visualstudiocode

@@ -7,7 +7,6 @@ import com.intellij.codeInsight.daemon.impl.analysis.HighlightInfoHolder
 import com.intellij.lang.Commenter
 import com.intellij.lang.LanguageCommenters
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.TextAttributesKey
@@ -20,24 +19,17 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import com.intellij.refactoring.suggested.endOffset
-import java.awt.Font
 import java.util.*
-import java.util.regex.Pattern
 
 class PreprocessorHighlight(private val project: Project) : HighlightVisitor, DumbAware {
 	private lateinit var holder: HighlightInfoHolder
 	private lateinit var commenter: Commenter
 	private lateinit var highlighter: SyntaxHighlighter
-
 	private var preprocessorState = ArrayDeque<PreprocessorState>()
 
-	override fun suitableForFile(file: PsiFile): Boolean {
-		return file.fileType.name.uppercase(Locale.getDefault()) in ALLOWED_TYPES
-	}
+	override fun suitableForFile(file: PsiFile) = file.fileType.name.uppercase(Locale.getDefault()) in ALLOWED_TYPES
 
-	override fun clone(): PreprocessorHighlight {
-		return PreprocessorHighlight(project)
-	}
+	override fun clone() = PreprocessorHighlight(project)
 
 	override fun analyze(
 		file: PsiFile,
@@ -56,15 +48,9 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 	override fun visit(element: PsiElement) {
 		if (element !is PsiCommentImpl) return
 		val commentSource = element.text
-		if (commenter.lineCommentPrefix?.let {
-				commentSource.startsWith(it)
-			} != true
-		) {
-			return
-		}
+		if (commenter.lineCommentPrefix?.let { commentSource.startsWith(it) } != true) return
 
 		val prefixLength = commenter.lineCommentPrefix?.length ?: return
-
 		val comment = commentSource.substring(prefixLength)
 		if (comment.isEmpty()) return
 
@@ -87,7 +73,6 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 					}
 
 					preprocessorState.push(PreprocessorState.IF)
-
 					holder.add(directive.toDirectiveHighlight(element, prefixLength))
 
 					if (commentSegments.size < 2) {
@@ -97,7 +82,6 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 
 					val conditionsSource = commentSegments[1]
 					val conditions = conditionsSource.split(SPLIT_PATTERN)
-
 					var nextStartPos = prefixLength + 3
 					for (condition in conditions) {
 						val trimmedCondition = condition.trim()
@@ -187,7 +171,6 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 			}
 		} else if (comment.startsWith("$$")) {
 			holder.add("$$".toDirectiveHighlight(element, prefixLength))
-
 			highlightCodeBlock(element, element.startOffset + prefixLength + 2, comment.substring(2))
 		}
 	}
@@ -198,7 +181,6 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 		text: String,
 	) {
 		val lexer = highlighter.highlightingLexer
-
 		lexer.start(text)
 		var token = lexer.tokenType
 
@@ -221,7 +203,6 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 					.create()
 
 			holder.add(directiveInfo)
-
 			lexer.advance()
 			token = lexer.tokenType
 		}
@@ -272,54 +253,39 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 	private fun String.toDirectiveHighlight(
 		element: PsiCommentImpl,
 		offset: Int = 0,
-	): HighlightInfo? {
-		return HighlightInfo
+	): HighlightInfo? =
+		HighlightInfo
 			.newHighlightInfo(DIRECTIVE_TYPE)
 			.textAttributes(DIRECTIVE_ATTRIBUTES)
 			.range(element, element.startOffset + offset, element.startOffset + offset + 1 + length)
 			.create()
-	}
 
 	private fun String.toInvalidConditionErrorHighlight(
 		element: PsiCommentImpl,
 		offset: Int = 0,
-	): HighlightInfo? {
-		return HighlightInfo
+	): HighlightInfo? =
+		HighlightInfo
 			.newHighlightInfo(HighlightInfoType.ERROR)
 			.range(element, element.startOffset + offset, element.startOffset + offset + length)
 			.descriptionAndTooltip("Invalid condition \"$this\"")
 			.create()
-	}
-
-	companion object {
-		private val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, Font.BOLD)
-		val SCHEME = EditorColorsManager.getInstance().globalScheme
-
-		private val DIRECTIVE_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.KEYWORD
-		val DIRECTIVE_ATTRIBUTES: TextAttributes =
-			TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), BOLD_ATTRIBUTE)
-		val DIRECTIVE_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, DIRECTIVE_COLOR)
-
-		private val OPERATOR_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.OPERATION_SIGN
-		val OPERATOR_ATTRIBUTES = SCHEME.getAttributes(OPERATOR_COLOR)
-		val OPERATOR_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, OPERATOR_COLOR)
-
-		private val IDENTIFIER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.IDENTIFIER
-		val IDENTIFIER_ATTRIBUTES: TextAttributes =
-			TextAttributes.merge(SCHEME.getAttributes(IDENTIFIER_COLOR), BOLD_ATTRIBUTE)
-		val IDENTIFIER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, IDENTIFIER_COLOR)
-
-		private val NUMBER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.NUMBER
-		val NUMBER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(NUMBER_COLOR), BOLD_ATTRIBUTE)
-		val NUMBER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, NUMBER_COLOR)
-
-		private val LOGGER: Logger = Logger.getInstance(PreprocessorHighlight::class.java)
-
-		private val WHITESPACES_PATTERN = "\\s+".toRegex()
-		private val EXPR_PATTERN = "(.+)(==|!=|<=|>=|<|>)(.+)".toRegex()
-		private val IDENTIFIER_PATTERN = "[A-Za-z0-9-]+".toRegex()
-		private val OR_PATTERN = Pattern.quote("||")
-		private val AND_PATTERN = Pattern.quote("&&")
-		private val SPLIT_PATTERN = Pattern.compile("$OR_PATTERN|$AND_PATTERN")
-	}
 }
+
+private val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
+val SCHEME = EditorColorsManager.getInstance().globalScheme
+private val DIRECTIVE_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.KEYWORD
+val DIRECTIVE_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), BOLD_ATTRIBUTE)
+val DIRECTIVE_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, DIRECTIVE_COLOR)
+private val IDENTIFIER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.IDENTIFIER
+val IDENTIFIER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(IDENTIFIER_COLOR), BOLD_ATTRIBUTE)
+val IDENTIFIER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, IDENTIFIER_COLOR)
+private val NUMBER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.NUMBER
+val NUMBER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(NUMBER_COLOR), BOLD_ATTRIBUTE)
+val NUMBER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, NUMBER_COLOR)
+
+private val WHITESPACES_PATTERN = "\\s+".toRegex()
+private val EXPR_PATTERN = "(.+)(==|!=|<=|>=|<|>)(.+)".toRegex()
+private val IDENTIFIER_PATTERN = "[A-Za-z0-9-]+".toRegex()
+private val OR_PATTERN = Regex.escape("||")
+private val AND_PATTERN = Regex.escape("&&")
+private val SPLIT_PATTERN = "$OR_PATTERN|$AND_PATTERN".toRegex()

@@ -9,9 +9,7 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 
 class PreprocessorImport : ImportOptimizer {
-	override fun supports(file: PsiFile): Boolean {
-		return file is PsiJavaFile
-	}
+	override fun supports(file: PsiFile) = file is PsiJavaFile
 
 	override fun processFile(file: PsiFile): Runnable {
 		if (file !is PsiJavaFile) return EmptyRunnable.getInstance()

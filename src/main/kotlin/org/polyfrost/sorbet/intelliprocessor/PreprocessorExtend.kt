@@ -11,7 +11,6 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import com.intellij.refactoring.suggested.startOffset
-import java.util.Locale
 
 class PreprocessorExtend : EnterHandlerDelegateAdapter(), DumbAware {
 	override fun preprocessEnter(
@@ -22,11 +21,7 @@ class PreprocessorExtend : EnterHandlerDelegateAdapter(), DumbAware {
 		dataContext: DataContext,
 		originalHandler: EditorActionHandler?,
 	): Result {
-		if (
-			EnterHandler.getLanguage(dataContext)
-				?.associatedFileType
-				?.name?.uppercase(Locale.getDefault()) !in ALLOWED_TYPES
-		) {
+		if (EnterHandler.getLanguage(dataContext)?.associatedFileType?.name?.uppercase(java.util.Locale.getDefault()) !in ALLOWED_TYPES) {
 			return Result.Continue
 		}
 

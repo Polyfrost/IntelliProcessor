@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateSet group="Preprocessor">
+	<!--
+		//#if $COND$
+		$CODE$
+		//#else
+		//$$$$ $ELSECODE$
+		//#endif
+	-->
+	<template description="Insert preprocessor if/else statement"
+			  name="pif" toReformat="false" toShortenFQNames="true"
+			  value="//#if $COND$&#10;$CODE$&#10;//#else&#10;//$$$$ $ELSECODE$&#10;//#endif">
+		<variable name="COND" expression="" defaultValue="" alwaysStopAt="true" />
+		<variable name="CODE" expression="" defaultValue="" alwaysStopAt="true" />
+		<variable name="ELSECODE" expression="" defaultValue="" alwaysStopAt="true" />
+		<context>
+			<option name="JAVA_CODE" value="true" />
+			<option name="KOTLIN" value="true" />
+		</context>
+	</template>
+</templateSet>

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Update to IntelliJ Platform `2.0.0`
+
 ## [2.1.0] - 2024-06-15
 
 ### Added

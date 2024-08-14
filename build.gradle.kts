@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -7,7 +8,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java")
     alias(libs.plugins.kotlin)
-    alias(libs.plugins.intellij)
+    alias(libs.plugins.intelliJPlatform)
     alias(libs.plugins.kotlinter)
 	alias(libs.plugins.changelog)
 }
@@ -15,45 +16,38 @@ plugins {
 group = properties("pluginGroup").get()
 version = properties("pluginVersion").get()
 
-repositories {
-    maven("https://repo.polyfrost.org/releases")
-}
-
 kotlin {
-    jvmToolchain(17)
+	jvmToolchain(17)
 }
 
-kotlinter {
-    ignoreFailures = false
-    reporters = arrayOf("checkstyle", "plain")
+repositories {
+	mavenCentral()
+
+	intellijPlatform {
+		defaultRepositories()
+	}
 }
 
-intellij {
-    pluginName = properties("pluginName")
-    version = properties("platformVersion")
-	type = properties("platformType")
+dependencies {
+	testImplementation(libs.junit)
 
-    plugins = properties("platformPlugins").map {
-        it.split(',').map(String::trim).filter(String::isNotEmpty)
-    }
+	intellijPlatform {
+		create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+		bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+		plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+
+		instrumentationTools()
+		pluginVerifier()
+		zipSigner()
+		testFramework(TestFrameworkType.Platform)
+	}
 }
 
-changelog {
-	groups.empty()
-	repositoryUrl = properties("pluginRepositoryUrl")
-}
+intellijPlatform {
+	pluginConfiguration {
+		version = providers.gradleProperty("pluginVersion")
 
-tasks {
-    wrapper {
-        gradleVersion = properties("gradleVersion").get()
-    }
-
-    patchPluginXml {
-        version = properties("pluginVersion")
-        sinceBuild = properties("pluginSinceBuild")
-        untilBuild = properties("pluginUntilBuild")
-
-		pluginDescription = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+		description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
 			val start = "<!-- plugin description -->"
 			val end = "<!-- plugin description end -->"
 
@@ -66,7 +60,7 @@ tasks {
 		}
 
 		val changelog = project.changelog
-		changeNotes = properties("pluginVersion").map { pluginVersion ->
+		changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
 			with(changelog) {
 				renderItem(
 					(getOrNull(pluginVersion) ?: getUnreleased())
@@ -76,28 +70,71 @@ tasks {
 				)
 			}
 		}
+
+		ideaVersion {
+			sinceBuild = providers.gradleProperty("pluginSinceBuild")
+			untilBuild = providers.gradleProperty("pluginUntilBuild")
+		}
+	}
+
+	signing {
+		certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
+		privateKey = providers.environmentVariable("PRIVATE_KEY")
+		password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
+	}
+
+	publishing {
+		token = providers.environmentVariable("PUBLISH_TOKEN")
+		channels = providers.gradleProperty("pluginVersion").map {
+			listOf(it.substringAfter('-', "")
+				.substringBefore('.').ifEmpty { "default" })
+		}
+	}
+
+	pluginVerification {
+		ides {
+			recommended()
+		}
+	}
+}
+
+changelog {
+	groups.empty()
+	repositoryUrl = properties("pluginRepositoryUrl")
+}
+
+kotlinter {
+	ignoreFailures = false
+	reporters = arrayOf("checkstyle", "plain")
+}
+
+tasks {
+    wrapper {
+        gradleVersion = properties("gradleVersion").get()
     }
-
-	runIdeForUiTests {
-		systemProperty("robot-server.port", "8082")
-		systemProperty("ide.mac.message.dialogs.as.sheets", "false")
-		systemProperty("jb.privacy.policy.text", "<!--999.999-->")
-		systemProperty("jb.consents.confirmation.enabled", "false")
-	}
-
-	signPlugin {
-		certificateChain = environment("CERTIFICATE_CHAIN")
-		privateKey = environment("PRIVATE_KEY")
-		password = environment("PRIVATE_KEY_PASSWORD")
-	}
 
 	publishPlugin {
 		dependsOn("patchChangelog")
-		token = environment("PUBLISH_TOKEN")
-		channels = properties("pluginVersion").map {
-			listOf(it.substringAfter("-", "").substringBefore(".").ifEmpty {
-				"default"
-			})
+	}
+}
+
+intellijPlatformTesting {
+	runIde {
+		register("runIdeForUiTests") {
+			task {
+				jvmArgumentProviders += CommandLineArgumentProvider {
+					listOf(
+						"-Drobot-server.port=8082",
+						"-Dide.mac.message.dialogs.as.sheets=false",
+						"-Djb.privacy.policy.text=<!--999.999-->",
+						"-Djb.consents.confirmation.enabled=false",
+					)
+				}
+			}
+
+			plugins {
+				robotServerPlugin()
+			}
 		}
 	}
 }

@@ -7,12 +7,14 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <highlightVisitor
-                implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorHighlight"
-        />
-        <enterHandlerDelegate
-                implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorExtend"
-        />
+        <highlightVisitor implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorHighlight" />
+		<!-- todo -->
+<!--		<completion.contributor -->
+<!--			language="JAVA"-->
+<!--			implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorCompletion"-->
+<!--		/>-->
+		<defaultLiveTemplates file="/liveTemplates/Preprocessor.xml" />
+		<enterHandlerDelegate implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorExtend" />
         <lang.importOptimizer
                 language="JAVA"
                 implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorImport"
@@ -32,7 +34,6 @@
     </extensions>
 
 	<actions>
-
 		<action id="org.polyfrost.sorbet.intelliprocessor.PreprocessorFileJumpAction"
 				class="org.polyfrost.sorbet.intelliprocessor.PreprocessorFileJumpAction"
 				text="Jump To Pre-Processed File"

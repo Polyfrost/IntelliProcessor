@@ -17,10 +17,9 @@ import com.intellij.refactoring.suggested.startOffset
 class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
 	override fun getPlaceholderText(node: ASTNode): String {
 		if (node !is PsiComment) return "...11".also { println("Not a comment? Is $node") }
-		val directivePrefix = (
+		val directivePrefix =
 			LanguageCommenters.INSTANCE.forLanguage(node.language).lineCommentPrefix
 				?: return "...222".also { println("Null comment prefix?") }
-		)
 		return (node as ASTNode).text.substring(directivePrefix.length)
 	}
 
@@ -30,31 +29,26 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
 		quick: Boolean,
 	): Array<FoldingDescriptor> {
 		val descriptors = mutableListOf<FoldingDescriptor>()
-		val directivePrefix =
-			(
-				LanguageCommenters.INSTANCE.forLanguage(root.language).lineCommentPrefix
-					?: return emptyArray()
-			) + "#"
-		val allDirectives =
-			PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java)
-				.filter { it.text.startsWith(directivePrefix) }
+		val directivePrefix = (LanguageCommenters.INSTANCE.forLanguage(root.language).lineCommentPrefix ?: return emptyArray()) + "#"
+		val allDirectives = PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java).filter { it.text.startsWith(directivePrefix) }
 
-		for ((index, directive) in allDirectives.withIndex()) if (directive.text.run {
-				startsWith(directivePrefix + "if") ||
-					startsWith(directivePrefix + "ifdef") ||
-					startsWith(directivePrefix + "else")
-			} && index + 1 < allDirectives.size
-		) {
-			val nextDirective = allDirectives[index + 1]
-			val endOffset =
-				when {
-					nextDirective.text.startsWith(directivePrefix + "endif") -> nextDirective.endOffset
-					nextDirective.prevSibling is PsiWhiteSpace -> nextDirective.prevSibling.startOffset
-					else -> nextDirective.startOffset
-				}
+		for ((index, directive) in allDirectives.withIndex())
+			if (directive.text.run {
+					startsWith(directivePrefix + "if") ||
+						startsWith(directivePrefix + "ifdef") ||
+						startsWith(directivePrefix + "else")
+				} && index + 1 < allDirectives.size
+			) {
+				val nextDirective = allDirectives[index + 1]
+				val endOffset =
+					when {
+						nextDirective.text.startsWith(directivePrefix + "endif") -> nextDirective.endOffset
+						nextDirective.prevSibling is PsiWhiteSpace -> nextDirective.prevSibling.startOffset
+						else -> nextDirective.startOffset
+					}
 
-			descriptors.add(FoldingDescriptor(directive, TextRange(directive.startOffset, endOffset)))
-		}
+				descriptors.add(FoldingDescriptor(directive, TextRange(directive.startOffset, endOffset)))
+			}
 
 		return descriptors.toTypedArray()
 	}
