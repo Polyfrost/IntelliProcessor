@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Remove deprecated IntelliJ platform APIs (psi `startOffset`, `endOffset`)
+- Fix `//$$ ` directive highlighting in cases where there is no spacing (`//#"1.14.2"`)
+
 ## [3.0.0] - 2024-08-14
 
 ### Added

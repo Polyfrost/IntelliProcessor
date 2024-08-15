@@ -11,8 +11,6 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.refactoring.suggested.endOffset
-import com.intellij.refactoring.suggested.startOffset
 
 class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
 	override fun getPlaceholderText(node: ASTNode): String {
@@ -42,12 +40,12 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
 				val nextDirective = allDirectives[index + 1]
 				val endOffset =
 					when {
-						nextDirective.text.startsWith(directivePrefix + "endif") -> nextDirective.endOffset
-						nextDirective.prevSibling is PsiWhiteSpace -> nextDirective.prevSibling.startOffset
-						else -> nextDirective.startOffset
+						nextDirective.text.startsWith(directivePrefix + "endif") -> nextDirective.textRange.endOffset
+						nextDirective.prevSibling is PsiWhiteSpace -> nextDirective.prevSibling.textRange.startOffset
+						else -> nextDirective.textRange.startOffset
 					}
 
-				descriptors.add(FoldingDescriptor(directive, TextRange(directive.startOffset, endOffset)))
+				descriptors.add(FoldingDescriptor(directive, TextRange(directive.textRange.startOffset, endOffset)))
 			}
 
 		return descriptors.toTypedArray()

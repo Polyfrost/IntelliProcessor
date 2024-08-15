@@ -10,7 +10,6 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
-import com.intellij.refactoring.suggested.startOffset
 
 class PreprocessorExtend : EnterHandlerDelegateAdapter(), DumbAware {
 	override fun preprocessEnter(
@@ -38,7 +37,7 @@ class PreprocessorExtend : EnterHandlerDelegateAdapter(), DumbAware {
 			return Result.DefaultForceIndent
 		} else if (psiAtOffset?.prevSibling is PsiCommentImpl) {
 			if (!psiAtOffset.prevSibling.text.startsWith("//$$")) return Result.Continue
-			val posInText = caret - psiAtOffset.prevSibling.startOffset
+			val posInText = caret - psiAtOffset.prevSibling.textRange.startOffset
 			if (posInText < 4) return Result.DefaultForceIndent
 
 			editor.document.insertString(editor.caretModel.offset, "//$$ ")

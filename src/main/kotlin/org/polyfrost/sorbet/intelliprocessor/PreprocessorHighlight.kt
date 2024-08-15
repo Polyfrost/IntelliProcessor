@@ -18,7 +18,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
-import com.intellij.refactoring.suggested.endOffset
 import java.util.ArrayDeque
 import java.util.Locale
 
@@ -172,7 +171,7 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 			}
 		} else if (comment.startsWith("$$")) {
 			holder.add("$$".toDirectiveHighlight(element, prefixLength))
-			highlightCodeBlock(element, element.startOffset + prefixLength + 2, comment.substring(2))
+			highlightCodeBlock(element, element.startOffset + prefixLength + 2, comment.substring(1))
 		}
 	}
 
@@ -221,7 +220,7 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 				.apply {
 					if (eol) {
 						endOfLine()
-						range(element.endOffset, element.endOffset)
+						range(element.textRange.endOffset, element.textRange.endOffset)
 					} else {
 						range(element)
 					}
@@ -272,15 +271,15 @@ class PreprocessorHighlight(private val project: Project) : HighlightVisitor, Du
 			.create()
 }
 
-private val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
+val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
 val SCHEME = EditorColorsManager.getInstance().globalScheme
-private val DIRECTIVE_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.KEYWORD
+val DIRECTIVE_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.KEYWORD
 val DIRECTIVE_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), BOLD_ATTRIBUTE)
 val DIRECTIVE_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, DIRECTIVE_COLOR)
-private val IDENTIFIER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.IDENTIFIER
+val IDENTIFIER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.IDENTIFIER
 val IDENTIFIER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(IDENTIFIER_COLOR), BOLD_ATTRIBUTE)
 val IDENTIFIER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, IDENTIFIER_COLOR)
-private val NUMBER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.NUMBER
+val NUMBER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.NUMBER
 val NUMBER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(NUMBER_COLOR), BOLD_ATTRIBUTE)
 val NUMBER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, NUMBER_COLOR)
 
