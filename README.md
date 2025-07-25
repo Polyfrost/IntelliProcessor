@@ -17,4 +17,3 @@ An IntelliJ plugin to add support for the ReplayMod [preprocessor syntax](https:
 * Auto-remapping within preprocessor comment blocks based on variables.
 * Configurable jump to preprocessed file action.
 <!-- plugin description end -->
-
