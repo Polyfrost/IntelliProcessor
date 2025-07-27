@@ -3,6 +3,7 @@ kotlin = "2.2.0"
 intellij-ide = "2025.1.4"
 intellij-plugin = "2.6.0"
 junit = "5.10.2"
+changelog = "2.2.1"
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
