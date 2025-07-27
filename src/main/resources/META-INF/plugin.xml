@@ -1,41 +1,43 @@
 <idea-plugin>
     <id>org.polyfrost.sorbet.intelliprocessor</id>
     <name>IntelliProcessor</name>
-    <vendor url="https://polyfrost.org">Polyfrost</vendor>
+    <vendor url="https://github.com/Polyfrost">Polyfrost</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends optional="true" config-file="kotlin-plugin.xml">org.jetbrains.kotlin</depends>
+    <depends>com.intellij.gradle</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <highlightVisitor implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorHighlight" />
-		<!-- todo -->
-<!--		<completion.contributor -->
-<!--			language="JAVA"-->
-<!--			implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorCompletion"-->
-<!--		/>-->
-		<defaultLiveTemplates file="/liveTemplates/Preprocessor.xml" />
-		<enterHandlerDelegate implementation="org.polyfrost.sorbet.intelliprocessor.PreprocessorExtend" />
+        <lang.foldingBuilder
+            language="JAVA"
+            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorFolding"
+            order="first"
+        />
+
+        <highlightVisitor implementation="org.polyfrost.intelliprocessor.editor.PreprocessorSyntaxHighlight" />
+
+        <completion.contributor
+            language="JAVA"
+            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorKeywordCompletion"
+        />
+
+        <enterHandlerDelegate implementation="org.polyfrost.intelliprocessor.editor.PreprocessorNewLineHandler" />
+
         <lang.importOptimizer
-                language="JAVA"
-                implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorImport"
-                order="first"
+            language="JAVA"
+            implementationClass="org.polyfrost.intelliprocessor.PreprocessorImport"
+            order="first"
         />
-        <lang.foldingBuilder
-                language="JAVA"
-                implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
-                order="first"
-        />
-        <lang.foldingBuilder
-                language="kotlin"
-                implementationClass="org.polyfrost.sorbet.intelliprocessor.PreprocessorFolding"
-                order="first"
-        />
+
+		<defaultLiveTemplates file="/liveTemplates/Preprocessor.xml" />
+
 		<notificationGroup displayType="BALLOON" id="Jump Failure" />
     </extensions>
 
 	<actions>
-		<action id="org.polyfrost.sorbet.intelliprocessor.PreprocessorFileJumpAction"
-				class="org.polyfrost.sorbet.intelliprocessor.PreprocessorFileJumpAction"
+		<action id="org.polyfrost.intelliprocessor.action.PreprocessorFileJumpAction"
+				class="org.polyfrost.intelliprocessor.action.PreprocessorFileJumpAction"
 				text="Jump To Pre-Processed File"
 				description="Jump from or to this file in the preprocessed source. Will not update those source files, so you might need to build your project to update those files.">
 			<add-to-group group-id="ToolsMenu" anchor="last"/>
