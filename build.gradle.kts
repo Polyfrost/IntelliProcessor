@@ -66,14 +66,15 @@ intellijPlatform {
 
 		val changelog = project.changelog
 		changeNotes = providers.gradleProperty("plugin.version").map { pluginVersion ->
-			with(changelog) {
-				renderItem(
-					(getOrNull(pluginVersion) ?: getUnreleased())
-						.withHeader(false)
-						.withEmptySections(false),
-					Changelog.OutputType.HTML,
-				)
-			}
+            with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML,
+                )
+            }
+        }
     }
 
     signing {
