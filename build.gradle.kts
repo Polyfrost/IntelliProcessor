@@ -2,6 +2,9 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.markdownToHTML
+
 plugins {
     java
     alias(libs.plugins.kotlin)
@@ -47,6 +50,29 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         version = providers.gradleProperty("plugin.version")
+
+        description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+			val start = "<!-- plugin description -->"
+			val end = "<!-- plugin description end -->"
+
+			with (it.lines()) {
+				if (!containsAll(listOf(start, end))) {
+					throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+				}
+				subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
+			}
+		}
+
+		val changelog = project.changelog
+		changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
+			with(changelog) {
+				renderItem(
+					(getOrNull(pluginVersion) ?: getUnreleased())
+						.withHeader(false)
+						.withEmptySections(false),
+					Changelog.OutputType.HTML,
+				)
+			}
     }
 
     signing {
@@ -69,6 +95,11 @@ intellijPlatform {
             recommended()
         }
     }
+}
+
+changelog {
+	groups.empty()
+	repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
 }
 
 intellijPlatformTesting {
@@ -100,4 +131,8 @@ tasks {
     wrapper {
         gradleVersion = providers.gradleProperty("gradle.version").get()
     }
+
+    publishPlugin {
+		dependsOn("patchChangelog")
+	}
 }
