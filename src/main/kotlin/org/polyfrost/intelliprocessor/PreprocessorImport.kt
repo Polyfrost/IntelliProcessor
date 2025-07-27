@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor
+package org.polyfrost.intelliprocessor
 
 import com.intellij.lang.ImportOptimizer
 import com.intellij.lang.LanguageImportStatements

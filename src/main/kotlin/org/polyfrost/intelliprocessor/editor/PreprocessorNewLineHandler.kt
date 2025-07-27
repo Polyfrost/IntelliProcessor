@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.editor
+package org.polyfrost.intelliprocessor.editor
 
 import com.intellij.codeInsight.editorActions.EnterHandler
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate.Result
@@ -11,8 +11,8 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import dev.deftu.intelliprocessor.ALLOWED_FILE_TYPES
-import dev.deftu.intelliprocessor.utils.*
+import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
+import org.polyfrost.intelliprocessor.utils.*
 import java.util.Locale
 
 class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {

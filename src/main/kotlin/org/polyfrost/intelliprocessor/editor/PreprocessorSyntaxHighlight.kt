@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.editor
+package org.polyfrost.intelliprocessor.editor
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType
@@ -18,8 +18,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
-import dev.deftu.intelliprocessor.ALLOWED_FILE_TYPES
-import dev.deftu.intelliprocessor.Scope
+import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
+import org.polyfrost.intelliprocessor.Scope
 import java.util.ArrayDeque
 import java.util.Deque
 import java.util.Locale

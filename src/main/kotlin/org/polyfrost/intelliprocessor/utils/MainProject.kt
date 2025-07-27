@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.utils
+package org.polyfrost.intelliprocessor.utils
 
 import com.intellij.psi.PsiFile
 import java.nio.file.Files

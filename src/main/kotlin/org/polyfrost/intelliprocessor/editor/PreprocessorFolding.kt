@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.editor
+package org.polyfrost.intelliprocessor.editor
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.LanguageCommenters

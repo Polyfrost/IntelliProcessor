@@ -1,7 +1,7 @@
 <idea-plugin>
-    <id>dev.deftu.intelliprocessor</id>
+    <id>org.polyfrost.sorbet.intelliprocessor</id>
     <name>IntelliProcessor</name>
-    <vendor url="https://github.com/Deftu">Deftu</vendor>
+    <vendor url="https://github.com/Polyfrost">Polyfrost</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
@@ -11,22 +11,22 @@
     <extensions defaultExtensionNs="com.intellij">
         <lang.foldingBuilder
             language="JAVA"
-            implementationClass="dev.deftu.intelliprocessor.editor.PreprocessorFolding"
+            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorFolding"
             order="first"
         />
 
-        <highlightVisitor implementation="dev.deftu.intelliprocessor.editor.PreprocessorSyntaxHighlight" />
+        <highlightVisitor implementation="org.polyfrost.intelliprocessor.editor.PreprocessorSyntaxHighlight" />
 
         <completion.contributor
             language="JAVA"
-            implementationClass="dev.deftu.intelliprocessor.editor.PreprocessorKeywordCompletion"
+            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorKeywordCompletion"
         />
 
-        <enterHandlerDelegate implementation="dev.deftu.intelliprocessor.editor.PreprocessorNewLineHandler" />
+        <enterHandlerDelegate implementation="org.polyfrost.intelliprocessor.editor.PreprocessorNewLineHandler" />
 
         <lang.importOptimizer
             language="JAVA"
-            implementationClass="dev.deftu.intelliprocessor.PreprocessorImport"
+            implementationClass="org.polyfrost.intelliprocessor.PreprocessorImport"
             order="first"
         />
 
@@ -36,8 +36,8 @@
     </extensions>
 
 	<actions>
-		<action id="dev.deftu.intelliprocessor.action.PreprocessorFileJumpAction"
-				class="dev.deftu.intelliprocessor.action.PreprocessorFileJumpAction"
+		<action id="org.polyfrost.intelliprocessor.action.PreprocessorFileJumpAction"
+				class="org.polyfrost.intelliprocessor.action.PreprocessorFileJumpAction"
 				text="Jump To Pre-Processed File"
 				description="Jump from or to this file in the preprocessed source. Will not update those source files, so you might need to build your project to update those files.">
 			<add-to-group group-id="ToolsMenu" anchor="last"/>

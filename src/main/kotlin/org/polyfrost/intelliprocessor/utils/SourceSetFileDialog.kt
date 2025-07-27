@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.utils
+package org.polyfrost.intelliprocessor.utils
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper

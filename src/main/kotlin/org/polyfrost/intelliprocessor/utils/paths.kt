@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.utils
+package org.polyfrost.intelliprocessor.utils
 
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.vfs.VfsUtilCore

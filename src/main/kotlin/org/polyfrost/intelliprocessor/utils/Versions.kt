@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.utils
+package org.polyfrost.intelliprocessor.utils
 
 object Versions {
 

@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.action
+package org.polyfrost.intelliprocessor.action
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
@@ -9,7 +9,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiManager
-import dev.deftu.intelliprocessor.utils.*
+import org.polyfrost.intelliprocessor.utils.*
 import java.nio.file.Path
 import kotlin.io.path.relativeToOrNull
 

@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor.editor
+package org.polyfrost.intelliprocessor.editor
 
 import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionResultSet
@@ -6,8 +6,8 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns.psiComment
 import com.intellij.psi.PsiComment
-import dev.deftu.intelliprocessor.KEYWORDS
-import dev.deftu.intelliprocessor.utils.register
+import org.polyfrost.intelliprocessor.KEYWORDS
+import org.polyfrost.intelliprocessor.utils.register
 
 class PreprocessorKeywordCompletion : CompletionContributor(), DumbAware {
 

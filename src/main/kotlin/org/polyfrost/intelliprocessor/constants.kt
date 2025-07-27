@@ -1,4 +1,4 @@
-package dev.deftu.intelliprocessor
+package org.polyfrost.intelliprocessor
 
 val ALLOWED_FILE_TYPES = setOf(
     "JAVA",

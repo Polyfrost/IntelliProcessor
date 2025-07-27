@@ -1,8 +1,8 @@
-package dev.deftu.intelliprocessor.utils
+package org.polyfrost.intelliprocessor.utils
 
 import com.intellij.psi.PsiComment
-import dev.deftu.intelliprocessor.utils.PreprocessorDirective.Else
-import dev.deftu.intelliprocessor.utils.PreprocessorDirective.EndIf
+import org.polyfrost.intelliprocessor.utils.PreprocessorDirective.Else
+import org.polyfrost.intelliprocessor.utils.PreprocessorDirective.EndIf
 
 interface ConditionContainingDirective {
     val condition: String

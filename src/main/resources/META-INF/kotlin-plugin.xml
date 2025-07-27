@@ -2,13 +2,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <lang.foldingBuilder
             language="kotlin"
-            implementationClass="dev.deftu.intelliprocessor.editor.PreprocessorFolding"
+            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorFolding"
             order="first"
         />
 
         <completion.contributor
             language="kotlin"
-            implementationClass="dev.deftu.intelliprocessor.editor.PreprocessorKeywordCompletion"
+            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorKeywordCompletion"
         />
     </extensions>
 
