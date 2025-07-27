@@ -9,6 +9,7 @@ plugins {
     java
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intellij.plugin)
+    alias(libs.plugins.changelog)
 }
 
 group = providers.gradleProperty("plugin.group").get()
@@ -64,7 +65,7 @@ intellijPlatform {
 		}
 
 		val changelog = project.changelog
-		changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
+		changeNotes = providers.gradleProperty("plugin.version").map { pluginVersion ->
 			with(changelog) {
 				renderItem(
 					(getOrNull(pluginVersion) ?: getUnreleased())
@@ -99,7 +100,7 @@ intellijPlatform {
 
 changelog {
 	groups.empty()
-	repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
+	repositoryUrl = providers.gradleProperty("plugin.repository.url")
 }
 
 intellijPlatformTesting {
