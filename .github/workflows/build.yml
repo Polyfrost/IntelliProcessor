@@ -27,7 +27,7 @@ jobs:
                   java-version: 17
 
             - name: Setup Gradle
-              uses: gradle/actions/setup-gradle@v3
+              uses: gradle/actions/setup-gradle@v4
               with:
                   add-job-summary-as-pr-comment: always
                   add-job-summary: always
@@ -92,7 +92,7 @@ jobs:
                   java-version: 17
 
             - name: Setup Gradle
-              uses: gradle/actions/setup-gradle@v3
+              uses: gradle/actions/setup-gradle@v4
               with:
                   add-job-summary-as-pr-comment: always
                   add-job-summary: always
