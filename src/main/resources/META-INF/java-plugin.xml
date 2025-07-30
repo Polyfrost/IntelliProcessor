@@ -1,19 +1,20 @@
 <idea-plugin>
-    <!-- Tell the IDE that we support Kotlin K2 mode -->
-    <extensions defaultExtensionNs="org.jetbrains.kotlin">
-        <supportsKotlinPluginMode supportsK2="true" />
-    </extensions>
-
     <extensions defaultExtensionNs="com.intellij">
         <lang.foldingBuilder
-            language="kotlin"
+            language="JAVA"
             implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorFolding"
             order="first"
         />
 
         <completion.contributor
-            language="kotlin"
+            language="JAVA"
             implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorKeywordCompletion"
+        />
+
+        <lang.importOptimizer
+            language="JAVA"
+            implementationClass="org.polyfrost.intelliprocessor.PreprocessorImport"
+            order="first"
         />
     </extensions>
 </idea-plugin>

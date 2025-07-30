@@ -44,6 +44,10 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
         }
 
         val conditionals = findEnclosingConditionalBlock(comment)
+        if (conditionals.isEmpty()) {
+            return Result.Continue
+        }
+
         val currentVersion = MainProject.comparable(file)
         if (currentVersion != null && isInsideActiveBlock(conditionals, currentVersion)) {
             return Result.Continue
@@ -126,7 +130,6 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
                     is PreprocessorDirective.If, is PreprocessorDirective.IfDef -> {
                         if (nesting == 0) {
                             block.add(0, directive)
-                            return block
                         } else {
                             nesting--
                         }
@@ -143,7 +146,7 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
             sibling = sibling.prevSibling
         }
 
-        return emptyList()
+        return block
     }
 
 }
