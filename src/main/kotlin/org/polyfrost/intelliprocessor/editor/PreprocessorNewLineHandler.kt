@@ -91,7 +91,7 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
 
     private fun evaluateCondition(condition: String, currentVersion: Int): Boolean {
         if (!condition.startsWith("MC")) {
-            return false
+            return true // Non-MC conditions are always considered "active"
         }
 
         val match = Regex("""MC\s*(==|!=|<=|>=|<|>)\s*(\S+)""").find(condition) ?: return false
