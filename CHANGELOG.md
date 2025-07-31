@@ -4,9 +4,7 @@
 
 ## [Unreleased]
 
-# IntelliProcessor 4.0.0
-
-## Added
+### Added
 
 - Add automatic preprocessor code opening when starting a newline after a non-matching preprocessor statement (such as `//#if MC >= 1.16.5` when your main project is 1.8.9)
 - Redesign file jump action
@@ -15,12 +13,12 @@
   - Make it work in subprojects/submodules
   - Give clearer warnings when something isn't working as expected
 
-## Fixed
+### Fixed
 
 - Fix memory leak in syntax highlighter
 - Fix indentation on automatically added newline characters being incorrect
 
-## Updated
+### Updated
 
 - Bump supported IntelliJ version to latest
 - Improve preprocessor statement folding algorithm
