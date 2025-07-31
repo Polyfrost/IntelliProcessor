@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [4.0.0] - 2025-07-31
+
 ### Added
 
 - Add automatic preprocessor code opening when starting a newline after a non-matching preprocessor statement (such as `//#if MC >= 1.16.5` when your main project is 1.8.9)
@@ -62,7 +64,8 @@
 
 - Updated IntelliJ version and refactored code
 
-[Unreleased]: https://github.com/Polyfrost/IntelliProcessor/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/Polyfrost/IntelliProcessor/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v2.0.0...v2.1.0
