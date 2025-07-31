@@ -17,11 +17,11 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
 import org.polyfrost.intelliprocessor.Scope
 import java.util.ArrayDeque
-import java.util.Deque
 import java.util.Locale
 
 val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
@@ -68,7 +68,13 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
         this.commenter = LanguageCommenters.INSTANCE.forLanguage(file.language)
         this.highlighter = SyntaxHighlighterFactory.getSyntaxHighlighter(file.language, file.project, file.virtualFile)
         this.stack = ArrayDeque()
-        action.run()
+        file.accept(object : PsiRecursiveElementWalkingVisitor() {
+            override fun visitElement(element: PsiElement) {
+                visit(element)
+                super.visitElement(element)
+            }
+        })
+
         return true
     }
 
