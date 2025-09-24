@@ -9,6 +9,8 @@ import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import java.awt.BorderLayout
 import java.awt.Component
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JComponent
@@ -68,9 +70,12 @@ class SourceSetFileDialog(
         init()
     }
 
+    // Focus the search field when the dialog is first opened, streamlines keyboard navigation
+    override fun getPreferredFocusedComponent(): JComponent? = search
+
     override fun createCenterPanel(): JComponent {
         val panel = JPanel(BorderLayout())
-        val search = SearchTextField()
+
         search.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
                 val filter = search.text.lowercase()
