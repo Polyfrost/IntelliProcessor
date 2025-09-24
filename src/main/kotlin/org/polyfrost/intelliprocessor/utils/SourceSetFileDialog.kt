@@ -43,7 +43,25 @@ class SourceSetFileDialog(
                 )
             }
         }
+
+        // Double click also triggers doOKAction()
+        addMouseListener(object : MouseAdapter() {
+            private var lastClickTime = 0L
+            private var lastSelectedIndex = -1
+
+            override fun mouseClicked(e: MouseEvent?) {
+                if (e?.button != MouseEvent.BUTTON1) return
+
+                val clickTime = System.currentTimeMillis()
+                if (selectedIndex == lastSelectedIndex && clickTime - lastClickTime < 1000) { // 1 second threshold
+                    doOKAction()
+                }
+                lastClickTime = clickTime
+                lastSelectedIndex = selectedIndex
+            }
+        })
     }
+    private val search = SearchTextField()
 
     init {
         title = "Select Preprocessed Source File"
