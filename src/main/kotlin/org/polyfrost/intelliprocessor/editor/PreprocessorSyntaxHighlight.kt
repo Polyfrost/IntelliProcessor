@@ -24,16 +24,32 @@ import org.polyfrost.intelliprocessor.Scope
 import java.util.ArrayDeque
 import java.util.Locale
 
-val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
 val SCHEME = EditorColorsManager.getInstance().globalScheme
+
+val COMMENT_COLOR = SCHEME.getAttributes(DefaultLanguageHighlighterColors.LINE_COMMENT).foregroundColor
+
+fun TextAttributes.fade(): TextAttributes {
+    this.foregroundColor = this.foregroundColor?.let { c ->
+        // fade halfway to comment colour
+        val r = c.red + (COMMENT_COLOR.red - c.red) / 2
+        val g = c.green + (COMMENT_COLOR.green - c.green) / 2
+        val b = c.blue + (COMMENT_COLOR.blue - c.blue) / 2
+        java.awt.Color(r, g, b)
+    }
+    return this
+}
+
+val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
+val ITALIC_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.ITALIC)
+
 val DIRECTIVE_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.KEYWORD
-val DIRECTIVE_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), BOLD_ATTRIBUTE)
+val DIRECTIVE_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), ITALIC_ATTRIBUTE).fade()
 val DIRECTIVE_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, DIRECTIVE_COLOR)
 val IDENTIFIER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.IDENTIFIER
-val IDENTIFIER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(IDENTIFIER_COLOR), BOLD_ATTRIBUTE)
+val IDENTIFIER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(IDENTIFIER_COLOR), BOLD_ATTRIBUTE).fade()
 val IDENTIFIER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, IDENTIFIER_COLOR)
 val NUMBER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.NUMBER
-val NUMBER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(NUMBER_COLOR), BOLD_ATTRIBUTE)
+val NUMBER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(NUMBER_COLOR), BOLD_ATTRIBUTE).fade()
 val NUMBER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, NUMBER_COLOR)
 
 private val WHITESPACES_PATTERN = "\\s+".toRegex()
@@ -206,7 +222,7 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             val mergedAttr = highlighter.getTokenHighlights(lexer.tokenType!!)
                 .fold(TextAttributes()) { acc, attr ->
                     TextAttributes.merge(acc, SCHEME.getAttributes(attr))
-                }
+                }.fade()
 
             holder.add(
                 HighlightInfo.newHighlightInfo(HighlightInfoType.INJECTED_LANGUAGE_FRAGMENT)
