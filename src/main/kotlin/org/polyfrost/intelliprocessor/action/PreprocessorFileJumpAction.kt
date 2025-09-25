@@ -42,7 +42,7 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
 
         val projectPath = currentlyEditingFile.relativeToOrNull(rootDirectory)?.toList()
             ?: return warning(project, "Current file not in project root")
-        val currentSourceSetFile = getSourceSetFrom(projectPath)
+        val currentSourceSetFile = getSourceSetFrom(projectPath, mainVersion, rootDirectory)
             ?: return warning(project, "File does not seem to be a preprocessor source or generated file")
 
         val allVersions = identifyVersionDirectories(rootDirectory)
@@ -50,18 +50,18 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
             return warning(project, "Could not find any preprocessed source sets. Make sure to build your project")
         }
 
-        val targets = allVersions.map { currentSourceSetFile.copy(version = it) }
-            .filter { it.version != mainVersion } // The preprocessed sources are not generated for the main project
+        val targets = allVersions.map { currentSourceSetFile.copy(subVersion = it) }
+            .filter { it.subVersion != mainVersion } // The preprocessed sources are not generated for the main project
         val ideView = LangDataKeys.IDE_VIEW.getData(e.dataContext)
             ?: return warning(project, "Could not find IDE view")
 
         val caret = editor.caretModel.currentCaret.visualPosition
-        SourceSetFileDialog(project, mainVersion, targets) { selected ->
-            val virtualFile = VfsUtil.findFile(rootDirectory.resolve(selected.toRelativePath()), true)
+        SourceSetFileDialog(project, targets) { selected ->
+            val virtualFile = VfsUtil.findFile(rootDirectory.resolve(selected.navigatePath()), true)
             if (virtualFile == null) {
                 warning(
                     project,
-                    "Could not find file for version ${selected.version ?: mainVersion} on disk. Try building your project"
+                    "Could not find file for version ${selected.displayVersion} on disk. Try building your project"
                 )
 
                 return@SourceSetFileDialog
@@ -83,18 +83,20 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
         }.show()
     }
 
-    private fun getSourceSetFrom(path: List<Path>): SourceSetFile? {
+    private fun getSourceSetFrom(path: List<Path>, mainVersion: String, rootDirectory: Path): SourceSetFile? {
         if (path.size < 4) {
             return null
         }
 
-        // A path in the format of src/<sourceset>/<language>/<package>/<class>
+        // The main file path in the format of src/<sourceset>/<language>/<package>/<class>
         if (path[0].toString() == "src") {
             return SourceSetFile(
                 path[1].toString(),
                 path[2].toString(),
                 path.subList(3, path.size).joinToPath(),
                 null,
+                mainVersion,
+                rootDirectory,
             )
         }
 
@@ -102,7 +104,7 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
             return null
         }
 
-        // A path in the format of `versions/<version>/build/preprocessed/<sourceset>/<language>/<package>/<class>`
+        // A generated preprocessed path in the format of `versions/<version>/build/preprocessed/<sourceset>/<language>/<package>/<class>`
         if (path[0].toString() == "versions" &&
             path[2].toString() == "build" &&
             path[3].toString() == "preprocessed"
@@ -112,6 +114,22 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
                 path[5].toString(),
                 path.subList(6, path.size).joinToPath(),
                 path[1].toString(),
+                mainVersion,
+                rootDirectory,
+            )
+        }
+
+        // An override file path in the format of `versions/<version>/src/<sourceset>/<language>/<package>/<class>`
+        if (path[0].toString() == "versions" &&
+            path[2].toString() == "src"
+        ) {
+            return SourceSetFile(
+                path[3].toString(),
+                path[4].toString(),
+                path.subList(5, path.size).joinToPath(),
+                path[1].toString(),
+                mainVersion,
+                rootDirectory,
             )
         }
 
