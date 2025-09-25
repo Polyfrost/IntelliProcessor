@@ -57,7 +57,7 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
 
         val caret = editor.caretModel.currentCaret.visualPosition
         SourceSetFileDialog(project, targets) { selected ->
-            val virtualFile = VfsUtil.findFile(rootDirectory.resolve(selected.navigatePath()), true)
+            val virtualFile = VfsUtil.findFile(rootDirectory.resolve(selected.toRelativePath()), true)
             if (virtualFile == null) {
                 warning(
                     project,
