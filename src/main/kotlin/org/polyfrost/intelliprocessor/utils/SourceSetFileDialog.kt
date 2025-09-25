@@ -82,6 +82,11 @@ class SourceSetFileDialog(
                 listModel.replaceAll(sourceFiles.filter {
                     it.toRelativePath().toString().lowercase().contains(filter)
                 })
+
+                // Improve keyboard navigation by auto-selecting the only remaining result
+                if (listModel.size == 1) {
+                    list.setSelectedValue(listModel.getElementAt(0), false)
+                }
             }
         })
 
