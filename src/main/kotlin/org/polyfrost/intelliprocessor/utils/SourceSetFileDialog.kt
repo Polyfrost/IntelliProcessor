@@ -94,8 +94,10 @@ class SourceSetFileDialog(
                     it.toString().lowercase().contains(filter)
                 })
 
-                // Improve keyboard navigation by auto-selecting the only remaining result
-                if (listModel.size == 1) {
+                if (filter.isEmpty() || listModel.isEmpty) {
+                    list.setSelectedValue(null, false)
+                } else {
+                    // Improve keyboard navigation by auto-selecting the first result
                     list.setSelectedValue(listModel.getElementAt(0), false)
                 }
             }
