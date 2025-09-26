@@ -42,6 +42,23 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
                     stack.addLast(directive)
                 }
 
+                text.startsWith(directivePrefix + "else") || text.startsWith(directivePrefix + "elseif") -> {
+                    val startDirective = stack.removeLastOrNull()
+                    if (startDirective != null) {
+                        val commentLine = document.getLineNumber(directive.textOffset)
+                        if (commentLine > 0) {
+                            val prevLineEnd = document.getLineEndOffset(commentLine - 1)
+                            descriptors.add(
+                                FoldingDescriptor(
+                                    startDirective,
+                                    TextRange(startDirective.textRange.startOffset, prevLineEnd)
+                                )
+                            )
+                            stack.addLast(directive)
+                        }
+                    }
+                }
+
                 text.startsWith(directivePrefix + "endif") -> {
                     val startDirective = stack.removeLastOrNull()
                     if (startDirective != null) {
