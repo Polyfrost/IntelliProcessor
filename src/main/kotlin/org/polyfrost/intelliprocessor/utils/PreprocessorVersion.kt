@@ -1,0 +1,60 @@
+package org.polyfrost.intelliprocessor.utils
+
+import com.intellij.openapi.vfs.toNioPathOrNull
+import com.intellij.psi.PsiFile
+import java.nio.file.Files
+import kotlin.collections.toList
+import kotlin.io.path.relativeTo
+
+// Represents a preprocessor comparable minecraft version along with its loader (e.g., fabric, forge).
+// Accessed as properties on string-ified preprocessor versions and PsiFiles.
+class PreprocessorVersion private constructor(val mc: Int, val loader: String) {
+    companion object {
+        val NULL = PreprocessorVersion(0, "null")
+
+        val String.preprocessorVersion: PreprocessorVersion? get() {
+            val int = makeComparable(this) ?: return null
+            val loader = split("-").getOrNull(1) ?: return null
+            return PreprocessorVersion(int, loader)
+        }
+
+        val PsiFile.preprocessorVersion: PreprocessorVersion? get() {
+            val version = versionStringOfFile ?: return null
+            return version.preprocessorVersion
+        }
+
+        val PsiFile.versionStringOfFile: String? get() {
+            val rootDirectory = findModuleDirForFile(this)?.toPath() ?: return null
+            val relPath = virtualFile.toNioPathOrNull()?.relativeTo(rootDirectory)?.toList() ?: return null
+            if (relPath[0].toString() != "versions") return preprocessorMainVersion
+            return relPath[1].toString()
+        }
+
+        val PsiFile.preprocessorMainVersion: String? get() {
+            val moduleDir = findModuleDirForFile(this) ?: run {
+                println("Module directory could not be found for file: ${virtualFile?.path}")
+                return null
+            }
+
+            val versionFile = moduleDir.toPath().resolve("versions/mainProject")
+            if (!Files.exists(versionFile)) {
+                println("Main project version file does not exist at: $versionFile")
+                return null
+            }
+
+            return Files.readString(versionFile).trim()
+        }
+
+        private val regex = "(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?".toRegex()
+        private fun makeComparable(version: String): Int? {
+            val match = regex.find(version) ?: return null
+            val groups = match.groups
+
+            val major = groups["major"]?.value?.toInt() ?: return null
+            val minor = groups["minor"]?.value?.toInt() ?: return null
+            val patch = groups["patch"]?.value?.toInt() ?: 0
+
+            return major * 10000 + minor * 100 + patch
+        }
+    }
+}
