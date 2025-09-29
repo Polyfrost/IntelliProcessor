@@ -9,7 +9,12 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil
+import org.polyfrost.intelliprocessor.config.PluginSettings
+import org.polyfrost.intelliprocessor.utils.PreprocessorConditions
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.preprocessorVersion
+import org.polyfrost.intelliprocessor.utils.allPreprocessorDirectiveComments
+import org.polyfrost.intelliprocessor.utils.directivePrefix
 
 class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
 
@@ -26,12 +31,16 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
         document: Document,
         quick: Boolean,
     ): Array<FoldingDescriptor> {
+
+        // Required to allow the "fold inactive blocks by default" feature
+        // Disabled for quick mode so we don't run all the condition checks on the fly
+        val preprocessorVersion =
+            if (quick || !PluginSettings.instance.foldInactiveBlocksByDefault) null
+            else root.containingFile.preprocessorVersion
+
         val descriptors = mutableListOf<FoldingDescriptor>()
-        val directivePrefix = (LanguageCommenters.INSTANCE.forLanguage(root.language).lineCommentPrefix ?: return emptyArray()) + "#"
-
-        val allDirectives = PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java)
-            .filter { it.text.startsWith(directivePrefix) }
-
+        val directivePrefix = root.directivePrefix()
+        val allDirectives = root.allPreprocessorDirectiveComments()
         val stack = ArrayDeque<PsiComment>()
 
         for (directive in allDirectives) {
@@ -42,16 +51,18 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
                     stack.addLast(directive)
                 }
 
-                text.startsWith(directivePrefix + "else") || text.startsWith(directivePrefix + "elseif") -> {
+                text.startsWith(directivePrefix + "else") -> { // elseif caught too
                     val startDirective = stack.removeLastOrNull()
                     if (startDirective != null) {
                         val commentLine = document.getLineNumber(directive.textOffset)
                         if (commentLine > 0) {
                             val prevLineEnd = document.getLineEndOffset(commentLine - 1)
                             descriptors.add(
-                                FoldingDescriptor(
-                                    startDirective,
-                                    TextRange(startDirective.textRange.startOffset, prevLineEnd)
+                                fold(startDirective,
+                                    startDirective.textRange.startOffset,
+                                    prevLineEnd,
+                                    preprocessorVersion,
+                                    allDirectives
                                 )
                             )
                             stack.addLast(directive)
@@ -63,9 +74,11 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
                     val startDirective = stack.removeLastOrNull()
                     if (startDirective != null) {
                         descriptors.add(
-                            FoldingDescriptor(
-                                startDirective,
-                                TextRange(startDirective.textRange.startOffset, directive.textRange.endOffset)
+                            fold(startDirective,
+                                startDirective.textRange.startOffset,
+                                directive.textRange.endOffset,
+                                preprocessorVersion,
+                                allDirectives
                             )
                         )
                     }
@@ -76,8 +89,28 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
         return descriptors.toTypedArray()
     }
 
+    private fun fold(element: PsiComment, startOffset: Int, endOffset: Int, thisVersion: PreprocessorVersion?, allDirectives: List<PsiComment>): FoldingDescriptor {
+        if (thisVersion == null || PluginSettings.instance.foldAllBlocksByDefault) {
+            return FoldingDescriptor(element, TextRange(startOffset, endOffset))
+        }
+
+        val shouldFold = PreprocessorConditions.findEnclosingConditionsOrNull(element, allDirectives)?.let{
+            !it.testVersion(thisVersion)
+        }
+
+        return FoldingDescriptor(
+            element.node,
+            TextRange(startOffset, endOffset),
+            null,
+            emptySet(),
+            false,
+            null,
+            shouldFold
+        )
+    }
+
     override fun isCollapsedByDefault(node: ASTNode): Boolean {
-        return false
+        return PluginSettings.instance.foldAllBlocksByDefault
     }
 
 }
