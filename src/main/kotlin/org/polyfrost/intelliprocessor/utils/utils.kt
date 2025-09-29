@@ -1,6 +1,7 @@
 package org.polyfrost.intelliprocessor.utils
 
 import com.intellij.codeInsight.completion.*
+import com.intellij.lang.LanguageCommenters
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.editor.Editor
@@ -8,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.patterns.ElementPattern
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import java.nio.file.Path
 
@@ -51,4 +53,14 @@ fun warning(
         .getNotificationGroup(groupId)
         .createNotification(content, NotificationType.WARNING)
         .notify(project)
+}
+
+fun PsiElement.directivePrefix(): String? {
+        return (LanguageCommenters.INSTANCE.forLanguage(language).lineCommentPrefix ?: return null) + "#"
+    }
+
+fun PsiElement.allPreprocessorDirectiveComments(): List<PsiComment> {
+    val directivePrefix = directivePrefix() ?: return emptyList()
+    return PsiTreeUtil.findChildrenOfType(this, PsiComment::class.java)
+        .filter { it.text.startsWith(directivePrefix) }
 }
