@@ -8,11 +8,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.Ref
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
 import org.polyfrost.intelliprocessor.utils.*
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.preprocessorVersion
 import java.util.Locale
 
 class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
@@ -43,13 +42,13 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
             return Result.DefaultForceIndent
         }
 
-        val conditionals = findEnclosingConditionalBlock(comment)
-        if (conditionals.isEmpty()) {
+        val conditions = PreprocessorConditions.findEnclosingConditionsOrNull(comment, file)
+        if (conditions == null) {
             return Result.Continue
         }
 
-        val currentVersion = MainProject.comparable(file)
-        if (currentVersion != null && isInsideActiveBlock(conditionals, currentVersion)) {
+        val currentVersion = file.preprocessorVersion
+        if (currentVersion != null && conditions.testVersion(currentVersion)) {
             return Result.Continue
         }
 
@@ -66,87 +65,6 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
         caretAdvance.set(insertText.length)
 
         return Result.Stop
-    }
-
-    private fun isInsideActiveBlock(
-        conditionals: List<PreprocessorDirective>,
-        currentVersion: Int
-    ): Boolean {
-        for (directive in conditionals) {
-            when (directive) {
-                is PreprocessorDirective.If, is PreprocessorDirective.ElseIf -> {
-                    val condition = (directive as ConditionContainingDirective).condition
-                    if (evaluateCondition(condition, currentVersion)) {
-                        return true
-                    }
-                }
-
-                is PreprocessorDirective.IfDef -> return true // TODO
-                is PreprocessorDirective.Else -> return true
-                is PreprocessorDirective.EndIf -> break
-            }
-        }
-        return false
-    }
-
-    private fun evaluateCondition(condition: String, currentVersion: Int): Boolean {
-        if (!condition.startsWith("MC")) {
-            return true // Non-MC conditions are always considered "active"
-        }
-
-        val match = Regex("""MC\s*(==|!=|<=|>=|<|>)\s*(\S+)""").find(condition) ?: return false
-        val (operator, rhsStr) = match.destructured
-        val rhs = Versions.makeComparable(rhsStr) ?: return false
-
-        return when (operator) {
-            "==" -> currentVersion == rhs
-            "!=" -> currentVersion != rhs
-            "<=" -> currentVersion <= rhs
-            ">=" -> currentVersion >= rhs
-            "<"  -> currentVersion < rhs
-            ">"  -> currentVersion > rhs
-            else -> false
-        }
-    }
-
-    private fun findEnclosingConditionalBlock(comment: PsiComment): List<PreprocessorDirective> {
-        val block = mutableListOf<PreprocessorDirective>()
-        var sibling: PsiElement? = comment
-        var nesting = 0
-
-        while (sibling != null) {
-            if (sibling is PsiComment) {
-                val directive = sibling.parseDirective()
-                if (directive == null) {
-                    sibling = sibling.prevSibling
-                    continue
-                }
-
-                when (directive) {
-                    is PreprocessorDirective.EndIf -> {
-                        nesting++
-                    }
-
-                    is PreprocessorDirective.If, is PreprocessorDirective.IfDef -> {
-                        if (nesting == 0) {
-                            block.add(0, directive)
-                        } else {
-                            nesting--
-                        }
-                    }
-
-                    is PreprocessorDirective.ElseIf, is PreprocessorDirective.Else -> {
-                        if (nesting == 0) {
-                            block.add(0, directive)
-                        }
-                    }
-                }
-            }
-
-            sibling = sibling.prevSibling
-        }
-
-        return block
     }
 
 }
