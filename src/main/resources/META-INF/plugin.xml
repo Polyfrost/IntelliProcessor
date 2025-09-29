@@ -15,6 +15,8 @@
 
         <defaultLiveTemplates file="/liveTemplates/Preprocessor.xml" />
         <notificationGroup displayType="BALLOON" id="Jump Failure" />
+
+        <projectConfigurable instance="org.polyfrost.intelliprocessor.config.PluginConfigurable"/>
     </extensions>
 
 	<actions>
