@@ -29,6 +29,7 @@ data class SourceSetFile(
         }
     }
 
+    var metOpeningCondition = true
 
     val displayVersion = subVersion ?: mainVersion
 
