@@ -1,5 +1,6 @@
 package org.polyfrost.intelliprocessor.utils
 
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.preprocessorVersion
 import java.nio.file.Path
 
 data class SourceSetFile(
@@ -31,16 +32,7 @@ data class SourceSetFile(
 
     val displayVersion = subVersion ?: mainVersion
 
-    // Used to sort entries as 1.8.9 will order before 1.12.2 otherwise
-    val versionInt = displayVersion.split('-').let { platform ->
-        // Convert semantic version to the preprocessor int: 1.21.2 -> 12102
-        fun List<String>.getOrZero(index: Int) = getOrNull(index)?.toIntOrNull() ?: 0
-        val semVer = platform[0].split('.')
-        semVer.getOrZero(0) * 10000 + semVer.getOrZero(1) * 100 + semVer.getOrZero(2)
-    }
-
-    // Simpler search key used to streamline keyboard navigation via search, 1.21.2-fabric -> 12102fabric
-    private val simpleVersion = "$versionInt${displayVersion.split('-')[1]}"
+    val version = displayVersion.preprocessorVersion ?: PreprocessorVersion.NULL
 
     override fun toString(): String {
         val displayFile = classPath.last()
@@ -49,7 +41,7 @@ data class SourceSetFile(
             else ""
 
         // e.g. [12102fabric] | 1.21.2-fabric | MyClass.java (main)
-        return "[$simpleVersion] | $displayVersion | $displayFile $srcMark"
+        return "[${version.mc}${version.loader}] | $displayVersion | $displayFile $srcMark"
     }
 
 }
