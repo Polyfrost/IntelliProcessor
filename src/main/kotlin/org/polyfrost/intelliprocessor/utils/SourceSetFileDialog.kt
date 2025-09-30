@@ -14,6 +14,8 @@ import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Font
 import java.awt.GridLayout
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.DefaultListCellRenderer
@@ -82,7 +84,21 @@ class SourceSetFileDialog(
             }
         })
     }
-    private val search = SearchTextField()
+
+    private val search = SearchTextField().apply {
+        // Keyboard navigation: Down arrow focuses into the list from the search field
+        textEditor.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent?) {
+                if (e?.keyCode == KeyEvent.VK_DOWN || e?.keyCode == KeyEvent.VK_KP_DOWN) {
+                    if (list.selectedValue == null) {
+                        list.selectedIndex = 0
+                    }
+                    list.requestFocusInWindow()
+                    e.consume()
+                }
+            }
+        })
+    }
 
     init {
         title = "Select Preprocessed Source File"
