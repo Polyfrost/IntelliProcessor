@@ -34,21 +34,11 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
         }
 
         val caretPos = caretOffset.get()
-        val psiAtOffset = file.findElementAt(caretPos) ?: return Result.Continue
-        val comment = psiAtOffset.containingComment ?: return Result.Continue
+        val currentVersion = file.preprocessorVersion ?: return Result.Continue
+        val conditions = PreprocessorConditions.findEnclosingConditionsOrNull(caretPos, file) ?: return Result.Continue
 
-        val posInText = caretPos - comment.textRange.startOffset
-        if (posInText < 4) {
-            return Result.DefaultForceIndent
-        }
-
-        val conditions = PreprocessorConditions.findEnclosingConditionsOrNull(comment, file)
-        if (conditions == null) {
-            return Result.Continue
-        }
-
-        val currentVersion = file.preprocessorVersion
-        if (currentVersion != null && conditions.testVersion(currentVersion)) {
+        // We are inside a preprocessor block, now check if it is active or not
+        if (conditions.testVersion(currentVersion)) {
             return Result.Continue
         }
 

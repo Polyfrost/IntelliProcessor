@@ -53,11 +53,8 @@ class PreprocessorConditions private constructor(
             return findEnclosingConditionsOrNull(previousComment, directives)
         }
 
-        fun findEnclosingConditionsOrNull(comment: PsiComment, file: PsiFile): PreprocessorConditions? =
-            findEnclosingConditionsOrNull(comment, file.allPreprocessorDirectiveComments())
-
         fun findEnclosingConditionsOrNull(
-            comment: PsiComment,
+            comment: PsiComment, // This comment should only be an already identified directive comment
             allDirectives: List<PsiComment>
         ): PreprocessorConditions? {
             var index = allDirectives.indexOfFirst { it === comment }
