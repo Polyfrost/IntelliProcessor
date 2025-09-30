@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.DumbAwareAction
@@ -58,7 +59,7 @@ open class PreprocessorFileJumpAction : DumbAwareAction() {
         val ideView = LangDataKeys.IDE_VIEW.getData(e.dataContext)
             ?: return warning(project, "Could not find IDE view")
 
-        val caret = editor.caretModel.currentCaret.visualPosition
+        val caret = editor.caretModel.currentCaret.offset
 
         // For if the caret is inside a preprocessor conditional block, test each target version against the conditions
         val foundConditionContext = testTargetsAgainstPreprocessorConditions(currentPsiFile, editor, targets)
@@ -83,7 +84,8 @@ open class PreprocessorFileJumpAction : DumbAwareAction() {
             ideView.selectElement(psiFile)
             val newEditor = FileEditorManager.getInstance(project).getSelectedEditor(virtualFile)
             if (newEditor is TextEditor) {
-                newEditor.editor.caretModel.moveToVisualPosition(caret)
+                newEditor.editor.caretModel.moveToOffset(caret)
+                newEditor.editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
             } else {
                 warning(project, "Could not set cursor for non-text file")
             }
