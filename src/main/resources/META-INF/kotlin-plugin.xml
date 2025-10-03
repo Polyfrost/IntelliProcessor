@@ -1,14 +1,8 @@
 <idea-plugin>
-    <!-- Tell the IDE that we support Kotlin K2 mode -->
-    <extensions defaultExtensionNs="org.jetbrains.kotlin">
-        <supportsKotlinPluginMode supportsK2="true" />
-    </extensions>
-
     <extensions defaultExtensionNs="com.intellij">
         <lang.foldingBuilder
             language="kotlin"
-            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorFolding"
-            order="first"
+            implementationClass="org.polyfrost.intelliprocessor.editor.folding.PreprocessorFoldingKotlin"
         />
 
         <completion.contributor

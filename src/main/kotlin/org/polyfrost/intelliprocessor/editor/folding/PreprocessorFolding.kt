@@ -1,4 +1,4 @@
-package org.polyfrost.intelliprocessor.editor
+package org.polyfrost.intelliprocessor.editor.folding
 
 import com.intellij.lang.ASTNode
 import com.intellij.lang.LanguageCommenters
@@ -16,7 +16,10 @@ import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.prepro
 import org.polyfrost.intelliprocessor.utils.allPreprocessorDirectiveComments
 import org.polyfrost.intelliprocessor.utils.directivePrefix
 
-class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
+/**
+ * Registering the folding builder class only allows 1 class per language, so we will make this abstract and extend it for java and kotlin
+ */
+abstract class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
 
     override fun getPlaceholderText(node: ASTNode): String {
         val comment = node.psi as? PsiComment ?: return "..."
@@ -31,16 +34,16 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
         document: Document,
         quick: Boolean,
     ): Array<FoldingDescriptor> {
+        val descriptors = mutableListOf<FoldingDescriptor>()
 
         // Required to allow the "fold inactive blocks by default" feature
         // Disabled for quick mode so we don't run all the condition checks on the fly
         val preprocessorVersion =
-            if (quick || !PluginSettings.instance.foldInactiveBlocksByDefault) null
+            if (!PluginSettings.Companion.instance.foldInactiveBlocksByDefault) null
             else root.containingFile.preprocessorVersion
 
-        val descriptors = mutableListOf<FoldingDescriptor>()
         val directivePrefix = root.directivePrefix()
-        val allDirectives = root.allPreprocessorDirectiveComments()
+        val allDirectives = root.containingFile.allPreprocessorDirectiveComments()
         val stack = ArrayDeque<PsiComment>()
 
         for (directive in allDirectives) {
@@ -58,7 +61,8 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
                         if (commentLine > 0) {
                             val prevLineEnd = document.getLineEndOffset(commentLine - 1)
                             descriptors.add(
-                                fold(startDirective,
+                                fold(
+                                    startDirective,
                                     startDirective.textRange.startOffset,
                                     prevLineEnd,
                                     preprocessorVersion,
@@ -74,7 +78,8 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
                     val startDirective = stack.removeLastOrNull()
                     if (startDirective != null) {
                         descriptors.add(
-                            fold(startDirective,
+                            fold(
+                                startDirective,
                                 startDirective.textRange.startOffset,
                                 directive.textRange.endOffset,
                                 preprocessorVersion,
@@ -89,12 +94,19 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
         return descriptors.toTypedArray()
     }
 
-    private fun fold(element: PsiComment, startOffset: Int, endOffset: Int, thisVersion: PreprocessorVersion?, allDirectives: List<PsiComment>): FoldingDescriptor {
-        if (thisVersion == null || PluginSettings.instance.foldAllBlocksByDefault) {
+    private fun fold(
+        element: PsiComment,
+        startOffset: Int,
+        endOffset: Int,
+        thisVersion: PreprocessorVersion?,
+        allDirectives: List<PsiComment>
+    ): FoldingDescriptor {
+
+        if (thisVersion == null || PluginSettings.Companion.instance.foldAllBlocksByDefault) {
             return FoldingDescriptor(element, TextRange(startOffset, endOffset))
         }
 
-        val shouldFold = PreprocessorConditions.findEnclosingConditionsOrNull(element, allDirectives)?.let{
+        val shouldFold = PreprocessorConditions.Companion.findEnclosingConditionsOrNull(element, allDirectives)?.let {
             !it.testVersion(thisVersion)
         }
 
@@ -110,7 +122,7 @@ class PreprocessorFolding : FoldingBuilderEx(), DumbAware {
     }
 
     override fun isCollapsedByDefault(node: ASTNode): Boolean {
-        return PluginSettings.instance.foldAllBlocksByDefault
+        return PluginSettings.Companion.instance.foldAllBlocksByDefault
     }
 
 }

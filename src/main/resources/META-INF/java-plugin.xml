@@ -2,7 +2,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <lang.foldingBuilder
             language="JAVA"
-            implementationClass="org.polyfrost.intelliprocessor.editor.PreprocessorFolding"
+            implementationClass="org.polyfrost.intelliprocessor.editor.folding.PreprocessorFoldingJava"
             order="first"
         />
 

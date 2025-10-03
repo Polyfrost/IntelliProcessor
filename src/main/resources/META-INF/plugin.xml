@@ -3,6 +3,11 @@
     <name>IntelliProcessor</name>
     <vendor url="https://github.com/Polyfrost">Polyfrost</vendor>
 
+    <!-- Tell the IDE that we support Kotlin K2 mode, this cannot just be in the kotlin-plugin.xml -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true" />
+    </extensions>
+
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="java-plugin.xml">com.intellij.modules.java</depends>
     <depends optional="true" config-file="kotlin-plugin.xml">org.jetbrains.kotlin</depends>
