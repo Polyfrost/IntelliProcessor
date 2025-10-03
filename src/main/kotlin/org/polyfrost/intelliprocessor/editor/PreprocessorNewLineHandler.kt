@@ -10,6 +10,7 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiFile
 import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
+import org.polyfrost.intelliprocessor.config.PluginSettings
 import org.polyfrost.intelliprocessor.utils.*
 import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.preprocessorVersion
 import java.util.Locale
@@ -24,6 +25,11 @@ class PreprocessorNewLineHandler : EnterHandlerDelegateAdapter(), DumbAware {
         dataContext: DataContext,
         originalHandler: EditorActionHandler?
     ): Result {
+
+        if (!PluginSettings.instance.addPreprocessorCommentOnEnter) {
+            return Result.Continue
+        }
+
         val fileTypeName = EnterHandler.getLanguage(dataContext)
             ?.associatedFileType
             ?.name

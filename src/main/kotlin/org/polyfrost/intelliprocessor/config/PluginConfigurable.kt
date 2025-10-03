@@ -16,6 +16,7 @@ class PluginConfigurable : Configurable {
     private lateinit var inspectionHighlightNonIndentedNestedIfsCheckbox: JCheckBox
     private lateinit var inspectionHighlightCommentsNotMatchingIfIndentsCheckbox: JCheckBox
     private lateinit var hideUnmatchedVersionsCheckbox: JCheckBox
+    private lateinit var addPreprocessorCommentOnEnterCheckbox: JCheckBox
 
 
     override fun getDisplayName(): String = "IntelliProcessor"
@@ -53,6 +54,8 @@ class PluginConfigurable : Configurable {
         hideUnmatchedVersionsCheckbox = JCheckBox("Hide results that do not meet preprocessor conditions at the caret")
             .tooltip("Hides version results in the 'Jump To Pre-Processed File' dialog that do not match the current file's preprocessor conditions found at the caret position.")
 
+        addPreprocessorCommentOnEnterCheckbox = JCheckBox("Add preprocessor comment '//$$ ' automatically to new lines in a disabled preprocessor block")
+            .tooltip("When pressing Enter inside a disabled preprocessor block, automatically adds a preprocessor comment '//$$ ' to the new line.")
 
         // Arrange components
 
@@ -72,13 +75,17 @@ class PluginConfigurable : Configurable {
                 add(foldInactiveBlocksByDefaultCheckbox)
             })
             
-            add(titledBlock("Inspection Highlighting") {
+            add(titledBlock("Formatting") {
                 add(inspectionHighlightNonIndentedNestedIfsCheckbox)
                 add(inspectionHighlightCommentsNotMatchingIfIndentsCheckbox)
             })
 
             add(titledBlock("Jump To Pre-Processed File Action") {
                 add(hideUnmatchedVersionsCheckbox)
+            })
+
+            add(titledBlock("Misc") {
+                add(addPreprocessorCommentOnEnterCheckbox)
             })
 
             add(titledBlock("Info") {
@@ -96,6 +103,7 @@ class PluginConfigurable : Configurable {
                 || inspectionHighlightNonIndentedNestedIfsCheckbox.isSelected != PluginSettings.instance.inspectionHighlightNonIndentedNestedIfs
                 || inspectionHighlightCommentsNotMatchingIfIndentsCheckbox.isSelected != PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents
                 || hideUnmatchedVersionsCheckbox.isSelected != PluginSettings.instance.hideUnmatchedVersions
+                || addPreprocessorCommentOnEnterCheckbox.isSelected != PluginSettings.instance.addPreprocessorCommentOnEnter
 
     override fun apply() {
         PluginSettings.instance.foldAllBlocksByDefault = foldAllBlocksByDefaultCheckbox.isSelected
@@ -103,6 +111,7 @@ class PluginConfigurable : Configurable {
         PluginSettings.instance.inspectionHighlightNonIndentedNestedIfs = inspectionHighlightNonIndentedNestedIfsCheckbox.isSelected
         PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents = inspectionHighlightCommentsNotMatchingIfIndentsCheckbox.isSelected
         PluginSettings.instance.hideUnmatchedVersions = hideUnmatchedVersionsCheckbox.isSelected
+        PluginSettings.instance.addPreprocessorCommentOnEnter = addPreprocessorCommentOnEnterCheckbox.isSelected
     }
 
     override fun reset() {
@@ -111,5 +120,6 @@ class PluginConfigurable : Configurable {
         inspectionHighlightNonIndentedNestedIfsCheckbox.isSelected = PluginSettings.instance.inspectionHighlightNonIndentedNestedIfs
         inspectionHighlightCommentsNotMatchingIfIndentsCheckbox.isSelected = PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents
         hideUnmatchedVersionsCheckbox.isSelected = PluginSettings.instance.hideUnmatchedVersions
+        addPreprocessorCommentOnEnterCheckbox.isSelected = PluginSettings.instance.addPreprocessorCommentOnEnter
     }
 }

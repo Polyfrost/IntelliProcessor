@@ -14,6 +14,7 @@ class PluginSettings : PersistentStateComponent<PluginSettings> {
     var inspectionHighlightNonIndentedNestedIfs: Boolean = true
     var inspectionHighlightCommentsNotMatchingIfIndents: Boolean = true
     var hideUnmatchedVersions: Boolean = false
+    var addPreprocessorCommentOnEnter = true
 
     override fun getState(): PluginSettings = this
 
@@ -23,6 +24,7 @@ class PluginSettings : PersistentStateComponent<PluginSettings> {
         this.inspectionHighlightNonIndentedNestedIfs = state.inspectionHighlightNonIndentedNestedIfs
         this.inspectionHighlightCommentsNotMatchingIfIndents = state.inspectionHighlightCommentsNotMatchingIfIndents
         this.hideUnmatchedVersions = state.hideUnmatchedVersions
+        this.addPreprocessorCommentOnEnter = state.addPreprocessorCommentOnEnter
     }
 
     companion object {
