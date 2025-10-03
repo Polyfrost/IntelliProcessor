@@ -21,6 +21,7 @@ import com.intellij.psi.PsiRecursiveElementWalkingVisitor
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
 import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
 import org.polyfrost.intelliprocessor.Scope
+import org.polyfrost.intelliprocessor.config.PluginSettings
 import java.util.ArrayDeque
 import java.util.Locale
 
@@ -65,6 +66,11 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
     private lateinit var commenter: Commenter
     private lateinit var highlighter: SyntaxHighlighter
     private var stack = ArrayDeque<Scope>()
+    private var indentStack = ArrayDeque<Int>()
+    private var indentGetter: (PsiElement) -> Int = { 0 }
+
+    private val doNestedIfIdentWarn get() = PluginSettings.instance.inspectionHighlightNonIndentedNestedIfs
+    private val doIdentMatchWarn get() = PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents
 
     override fun suitableForFile(file: PsiFile): Boolean {
         return file.fileType.name.uppercase(Locale.ROOT) in ALLOWED_FILE_TYPES
@@ -84,6 +90,13 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
         this.commenter = LanguageCommenters.INSTANCE.forLanguage(file.language)
         this.highlighter = SyntaxHighlighterFactory.getSyntaxHighlighter(file.language, file.project, file.virtualFile)
         this.stack = ArrayDeque()
+        this.indentStack = ArrayDeque()
+        indentGetter = {
+            val offset = it.textOffset
+            val line = file.fileDocument.getLineNumber(offset)
+            val lineStart = file.fileDocument.getLineStartOffset(line)
+            offset - lineStart
+        }
         file.accept(object : PsiRecursiveElementWalkingVisitor() {
             override fun visitElement(element: PsiElement) {
                 visit(element)
@@ -112,6 +125,14 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             comment.startsWith("$$") -> {
                 holder.add("$$".toDirectiveHighlight(element, prefixLength))
                 highlightCodeBlock(element, element.startOffset + prefixLength + 2, comment.drop(2))
+
+                if (doIdentMatchWarn) {
+                    val indent = indentGetter(element)
+                    val previousIndent = indentStack.peekFirst()
+                    if (indent != (previousIndent ?: -1)) {
+                        warn(element, "\"$$\" line is not indented the same as it's containing block (Code clarity)")
+                    }
+                }
             }
         }
     }
@@ -136,6 +157,21 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             }
 
             stack.pop()
+        }
+
+        if (doNestedIfIdentWarn || doIdentMatchWarn) {
+            val indent = indentGetter(element)
+            val previousIndent = indentStack.peekFirst()
+            if (directive == "if") {
+                if (doNestedIfIdentWarn && indent <= (previousIndent ?: -1)) {
+                    warn(element, "\"$directive\" is not indented more than it's outer \"if\" block (Code clarity)")
+                }
+                indentStack.push(indent)
+            } else if (directive == "elseif") {
+                if (doIdentMatchWarn && indent != (previousIndent ?: -1)) {
+                    warn(element, "\"$directive\" is not indented the same as it's starting \"if\" (Code clarity)")
+                }
+            }
         }
 
         stack.push(Scope.IF)
@@ -165,6 +201,15 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
     }
 
     private fun handleIfDef(element: PsiCommentImpl, segments: List<String>, prefixLength: Int) {
+        if (doNestedIfIdentWarn) {
+            val indent = indentGetter(element)
+            val previousIndent = indentStack.peekFirst()
+            if (indent <= (previousIndent ?: -1)) {
+                warn(element, "\"ifdef\" is not indented more than it's outer \"if\" block (Code clarity)")
+            }
+            indentStack.push(indent)
+        }
+
         stack.push(Scope.IF)
         holder.add("ifdef".toDirectiveHighlight(element, prefixLength))
 
@@ -189,6 +234,13 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             fail(element, "\"else\" must follow \"if\" (last in scope: ${previous?.name})")
             return
         }
+        if (doIdentMatchWarn) {
+            val indent = indentGetter(element)
+            val previousIndent = indentStack.peekFirst()
+            if (indent != (previousIndent ?: -1)) {
+                warn(element, "\"else\" is not indented the same as it's starting \"if\" (Code clarity)")
+            }
+        }
 
         stack.pop()
         stack.push(Scope.ELSE)
@@ -205,6 +257,14 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             fail(element, "\"endif\" must follow \"if\" or \"else\" (last in scope: ${previous?.name})")
             return
         }
+        if (doIdentMatchWarn) {
+            val indent = indentGetter(element)
+            val previousIndent = indentStack.peekFirst()
+            if (indent != (previousIndent ?: -1)) {
+                warn(element, "\"endif\" is not indented the same as it's starting \"if\" (Code clarity)")
+            }
+            indentStack.pop()
+        } else if (doNestedIfIdentWarn) indentStack.pop()
 
         stack.pop()
         holder.add("endif".toDirectiveHighlight(element, prefixLength))
@@ -239,8 +299,14 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
         }
     }
 
-    private fun fail(element: PsiElement, message: String, eol: Boolean = false) {
-        val builder = HighlightInfo.newHighlightInfo(HighlightInfoType.ERROR)
+    private fun fail(element: PsiElement, message: String, eol: Boolean = false) =
+        highlightType(element, message, eol, HighlightInfoType.ERROR)
+
+    private fun warn(element: PsiElement, message: String, eol: Boolean = false) =
+        highlightType(element, message, eol, HighlightInfoType.WEAK_WARNING)
+
+    private fun highlightType(element: PsiElement, message: String, eol: Boolean = false, type: HighlightInfoType) {
+        val builder = HighlightInfo.newHighlightInfo(type)
             .descriptionAndTooltip(message)
 
         if (eol) {

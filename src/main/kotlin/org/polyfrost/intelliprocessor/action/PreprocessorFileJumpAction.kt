@@ -3,17 +3,21 @@ package org.polyfrost.intelliprocessor.action
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import org.polyfrost.intelliprocessor.utils.*
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.preprocessorMainVersion
 import java.nio.file.Path
 import kotlin.io.path.relativeToOrNull
 
-class PreprocessorFileJumpAction : DumbAwareAction() {
+open class PreprocessorFileJumpAction : DumbAwareAction() {
 
     private companion object {
         private const val GROUP_ID = "Jump Failure"
@@ -32,7 +36,7 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
         val rootDirectory = findModuleDirForFile(currentPsiFile)
             ?.toPath()
             ?: return warning(project, "Could not find module directory for file")
-        val mainVersion = MainProject.get(currentPsiFile)
+        val mainVersion = currentPsiFile.preprocessorMainVersion
             ?: return warning(project, "Could not find mainProject. Is this a preprocessor project?")
         val currentlyEditingFile = currentPsiFile.virtualFile?.toNioPath()
             ?: return warning(project, "Could not find file on disk")
@@ -55,8 +59,12 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
         val ideView = LangDataKeys.IDE_VIEW.getData(e.dataContext)
             ?: return warning(project, "Could not find IDE view")
 
-        val caret = editor.caretModel.currentCaret.visualPosition
-        SourceSetFileDialog(project, targets) { selected ->
+        val caret = editor.caretModel.currentCaret.offset
+
+        // For if the caret is inside a preprocessor conditional block, test each target version against the conditions
+        val foundConditionContext = testTargetsAgainstPreprocessorConditions(currentPsiFile, editor, targets)
+
+        SourceSetFileDialog(project, targets, foundConditionContext) { selected ->
             val virtualFile = VfsUtil.findFile(rootDirectory.resolve(selected.toRelativePath()), true)
             if (virtualFile == null) {
                 warning(
@@ -76,11 +84,26 @@ class PreprocessorFileJumpAction : DumbAwareAction() {
             ideView.selectElement(psiFile)
             val newEditor = FileEditorManager.getInstance(project).getSelectedEditor(virtualFile)
             if (newEditor is TextEditor) {
-                newEditor.editor.caretModel.moveToVisualPosition(caret)
+                newEditor.editor.caretModel.moveToOffset(caret)
+                newEditor.editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
             } else {
                 warning(project, "Could not set cursor for non-text file")
             }
         }.show()
+    }
+
+    // If the caret is inside a preprocessor conditional block, test each target version against the conditions there
+    private fun testTargetsAgainstPreprocessorConditions(
+        file: PsiFile,
+        editor: Editor,
+        targets: List<SourceSetFile>
+    ): Boolean {
+        val selectedPos = editor.caretModel.currentCaret.offset
+        val conditions = PreprocessorConditions.findEnclosingConditionsOrNull(selectedPos, file)
+        if (conditions != null) {
+            targets.forEach { it.metOpeningCondition = conditions.testVersion(it.version) }
+        }
+        return conditions != null
     }
 
     private fun getSourceSetFrom(path: List<Path>, mainVersion: String, rootDirectory: Path): SourceSetFile? {
