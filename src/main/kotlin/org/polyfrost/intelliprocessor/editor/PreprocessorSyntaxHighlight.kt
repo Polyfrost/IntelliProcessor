@@ -303,7 +303,7 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
         highlightType(element, message, eol, HighlightInfoType.ERROR)
 
     private fun warn(element: PsiElement, message: String, eol: Boolean = false) =
-        highlightType(element, message, eol, HighlightInfoType.WARNING)
+        highlightType(element, message, eol, HighlightInfoType.WEAK_WARNING)
 
     private fun highlightType(element: PsiElement, message: String, eol: Boolean = false, type: HighlightInfoType) {
         val builder = HighlightInfo.newHighlightInfo(type)
