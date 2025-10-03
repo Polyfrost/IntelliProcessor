@@ -59,7 +59,7 @@ fun PsiElement.directivePrefix(): String? {
         return (LanguageCommenters.INSTANCE.forLanguage(language).lineCommentPrefix ?: return null) + "#"
     }
 
-fun PsiElement.allPreprocessorDirectiveComments(): List<PsiComment> {
+fun PsiFile.allPreprocessorDirectiveComments(): List<PsiComment> {
     val directivePrefix = directivePrefix() ?: return emptyList()
     return PsiTreeUtil.findChildrenOfType(this, PsiComment::class.java)
         .filter { it.text.startsWith(directivePrefix) }
