@@ -1,5 +1,7 @@
 package org.polyfrost.intelliprocessor.utils
 
+import com.intellij.openapi.module.ModuleUtilCore
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.toNioPathOrNull
 import com.intellij.psi.PsiFile
 import java.nio.file.Files
@@ -23,9 +25,15 @@ class PreprocessorVersion private constructor(val mc: Int, val loader: String) {
             return version.preprocessorVersion
         }
 
+        private val extractFromModule = """\b\d+\.\d+(?:\.\d+)?-\w+\b""".toRegex()
         val PsiFile.versionStringOfFile: String? get() {
+            val vf: VirtualFile? = virtualFile
+            if (vf == null) { // No backing file
+                val module = ModuleUtilCore.findModuleForPsiElement(this) ?: return null
+                return extractFromModule.find(module.name)?.value ?: preprocessorMainVersion
+            }
             val rootDirectory = findModuleDirForFile(this)?.toPath() ?: return null
-            val relPath = virtualFile.toNioPathOrNull()?.relativeTo(rootDirectory)?.toList() ?: return null
+            val relPath = vf.toNioPathOrNull()?.relativeTo(rootDirectory)?.toList() ?: return null
             if (relPath[0].toString() != "versions") return preprocessorMainVersion
             return relPath[1].toString()
         }
