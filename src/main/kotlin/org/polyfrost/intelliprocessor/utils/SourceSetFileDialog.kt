@@ -53,7 +53,9 @@ class SourceSetFileDialog(
                     if (it.isNonGenerated) {
                         font = font.deriveFont(Font.BOLD)
                     }
-                    if (!it.metOpeningCondition) foreground = JBColor.GRAY
+                    if (!it.metOpeningCondition) {
+                        foreground = JBColor.GRAY
+                    }
                 }
             }
 
@@ -120,7 +122,7 @@ class SourceSetFileDialog(
         panel.add(search, BorderLayout.NORTH)
         panel.add(JBScrollPane(list), BorderLayout.CENTER)
         bottomPanelOrNull()?.let {
-            panel.add(it,BorderLayout.SOUTH)
+            panel.add(it, BorderLayout.SOUTH)
         }
         return panel
     }
