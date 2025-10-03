@@ -8,24 +8,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.patterns.ElementPattern
 import com.intellij.psi.*
-import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import java.nio.file.Path
 
 val Editor.activeFile: PsiFile?
     get() = project?.let { project -> PsiDocumentManager.getInstance(project).getPsiFile(this.document) }
-
-val PsiElement.containingComment: PsiComment?
-    get() = when (this) {
-        is PsiComment -> this
-        is PsiWhiteSpace, is PsiPlainText, is LeafPsiElement -> {
-            this.prevSibling?.takeIf { it is PsiComment } as? PsiComment
-                ?: this.parent?.takeIf { it is PsiComment } as? PsiComment
-        }
-
-        else -> parent as? PsiComment
-    }
 
 fun Iterable<Path>.joinToPath(): Path {
     return reduce { acc, path ->
