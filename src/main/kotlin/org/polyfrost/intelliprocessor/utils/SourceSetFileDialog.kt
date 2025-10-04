@@ -92,8 +92,11 @@ class SourceSetFileDialog(
         textEditor.addKeyListener(object : KeyAdapter() {
             override fun keyPressed(e: KeyEvent?) {
                 if (e?.keyCode == KeyEvent.VK_DOWN || e?.keyCode == KeyEvent.VK_KP_DOWN) {
-                    if (list.selectedValue == null) {
-                        list.selectedIndex = 0
+                    if (list.selectedIndex == 0 && listModel.size > 1) {
+                        // Set to 1 as the first index (0) should already be auto-selected meaning we can treat the down
+                        // arrow like moving down as if we were in the list already, (which we kind of are since pressing
+                        // enter will already open the selected item at 0 before this down press)
+                        list.selectedIndex = 1
                     }
                     list.requestFocusInWindow()
                     e.consume()
@@ -124,6 +127,7 @@ class SourceSetFileDialog(
         bottomPanelOrNull()?.let {
             panel.add(it, BorderLayout.SOUTH)
         }
+        filterList()
         return panel
     }
 
@@ -154,7 +158,6 @@ class SourceSetFileDialog(
                     filterList()
                 }
             })
-            filterList()
         }
 
         return if (belowList.isEmpty()) null else JPanel(GridLayout(belowList.size, 1)).apply {
@@ -172,7 +175,7 @@ class SourceSetFileDialog(
                     &&  (!PluginSettings.instance.hideUnmatchedVersions || it.metOpeningCondition)
         })
 
-        if (filter.isEmpty() || listModel.isEmpty) {
+        if (listModel.isEmpty) {
             list.setSelectedValue(null, false)
         } else {
             // Improve keyboard navigation by auto-selecting the first result
