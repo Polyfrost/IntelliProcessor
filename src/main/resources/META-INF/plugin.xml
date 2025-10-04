@@ -31,5 +31,11 @@
 				description="Jump from or to this file in the preprocessed source. Will not update those source files, so you might need to build your project to update those files.">
 			<add-to-group group-id="ToolsMenu" anchor="last"/>
 		</action>
-	</actions>
+        <action id="org.polyfrost.intelliprocessor.action.PreprocessorCommentToggleAction"
+                class="org.polyfrost.intelliprocessor.action.PreprocessorCommentToggleAction"
+                text="Toggle Preprocessor Comments Of Block &quot;//$$ &quot;"
+                description="Toggles all preprocessor comments (//$$ ) in the selected block">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
