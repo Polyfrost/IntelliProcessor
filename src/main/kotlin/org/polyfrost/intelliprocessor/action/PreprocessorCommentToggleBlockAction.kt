@@ -63,12 +63,20 @@ class PreprocessorCommentToggleBlockAction  : AnAction() {
 
                 val lineStart = document.getLineStartOffset(line)
                 val lineEnd = document.getLineEndOffset(line)
-                val text = document.getText(TextRange(lineStart, lineEnd))
+                var text = document.getText(TextRange(lineStart, lineEnd))
+
+                if (text.trimStart().startsWith("//#")) {
+                    warning(project, "Action tried to modify preprocessor directive line at line#${line + 1}, aborting.")
+                    break // something is very wrong abort
+                }
 
                 // Clean up any existing toggle comments
-                document.replaceString(lineStart, lineEnd, text.replaceFirst(REPLACE, ""))
+                text = text.replaceFirst(REPLACE, "")
 
-                if (toggleCommentsOff) continue
+                if (toggleCommentsOff) {
+                    document.replaceString(lineStart, lineEnd, text)
+                    continue
+                }
 
                 // If the line is blank, just insert a blank comment
                 if (text.trim().isEmpty()) {

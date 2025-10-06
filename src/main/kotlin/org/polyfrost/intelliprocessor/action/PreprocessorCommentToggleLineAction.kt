@@ -7,10 +7,6 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import org.jetbrains.kotlin.idea.base.psi.getLineNumber
-import org.polyfrost.intelliprocessor.utils.PreprocessorContainingBlock
-import org.polyfrost.intelliprocessor.utils.activeFile
-import org.polyfrost.intelliprocessor.utils.allPreprocessorDirectiveComments
 
 class PreprocessorCommentToggleLineAction  : AnAction() {
 
@@ -19,26 +15,28 @@ class PreprocessorCommentToggleLineAction  : AnAction() {
         val editor: Editor = FileEditorManager.getInstance(project).selectedTextEditor ?: return warning(project, "Could not find an open editor")
         val document = editor.document
 
-        val startLine = editor.caretModel.primaryCaret.selectionStartPosition.line
-        val endLine = editor.caretModel.primaryCaret.selectionEndPosition.line
+        val startLine = document.getLineNumber(editor.selectionModel.selectionStart)
+        val endLine = document.getLineNumber(editor.selectionModel.selectionEnd)
 
         WriteCommandAction.runWriteCommandAction(project) {
             for (line in startLine..endLine) {
                 val lineStart = document.getLineStartOffset(line)
                 val lineEnd = document.getLineEndOffset(line)
                 val text = document.getText(TextRange(lineStart, lineEnd))
-
-                val toggleCommentsOff = text.contains("//$$")
-
-                // Clean up any existing toggle comments
-                document.replaceString(lineStart, lineEnd, text.replaceFirst(REPLACE, ""))
-
-                if (toggleCommentsOff) return@runWriteCommandAction
+                val trim = text.trim()
 
                 // If the line is blank, just insert a blank comment
-                if (text.trim().isEmpty()) {
+                if (trim.isEmpty()) {
                     document.replaceString(lineStart, lineEnd, "//$$ ")
-                    return@runWriteCommandAction
+                    continue
+                }
+
+                if (trim.startsWith("//#")) continue
+
+                if (trim.startsWith("//$$")) {
+                    // Clean up any existing toggle comments
+                    document.replaceString(lineStart, lineEnd, text.replaceFirst(REPLACE, ""))
+                    continue
                 }
 
                 // Only comment lines that are indented at least as much as the block start
