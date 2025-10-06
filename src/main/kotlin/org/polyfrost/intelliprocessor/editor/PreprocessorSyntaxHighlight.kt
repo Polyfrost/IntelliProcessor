@@ -55,7 +55,7 @@ val NUMBER_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFO
 
 private val WHITESPACES_PATTERN = "\\s+".toRegex()
 private val EXPR_PATTERN = "(.+)(==|!=|<=|>=|<|>)(.+)".toRegex()
-private val IDENTIFIER_PATTERN = "[A-Za-z0-9-]+".toRegex()
+private val IDENTIFIER_PATTERN = "!?[A-Za-z0-9-]+".toRegex()
 private val OR_PATTERN = Regex.escape("||")
 private val AND_PATTERN = Regex.escape("&&")
 private val SPLIT_PATTERN = "$OR_PATTERN|$AND_PATTERN".toRegex()
