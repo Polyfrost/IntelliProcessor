@@ -12,7 +12,7 @@ import org.polyfrost.intelliprocessor.utils.PreprocessorContainingBlock
 import org.polyfrost.intelliprocessor.utils.activeFile
 import org.polyfrost.intelliprocessor.utils.allPreprocessorDirectiveComments
 
-class PreprocessorCommentToggleAction  : AnAction() {
+class PreprocessorCommentToggleBlockAction  : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project: Project = e.project ?: return
@@ -47,7 +47,7 @@ class PreprocessorCommentToggleAction  : AnAction() {
             ))
         )
 
-        val alreadyHasComments = document.getText(TextRange(
+        val toggleCommentsOff = document.getText(TextRange(
             document.getLineStartOffset(startLine),
             document.getLineEndOffset(startLine)
         )).trim().startsWith("//$$")
@@ -65,12 +65,10 @@ class PreprocessorCommentToggleAction  : AnAction() {
                 val lineEnd = document.getLineEndOffset(line)
                 val text = document.getText(TextRange(lineStart, lineEnd))
 
-                // Just remove comments if they are already there
-                if (alreadyHasComments) {
-                    document.replaceString(lineStart, lineEnd,
-                        text.replaceFirst(REPLACE, ""))
-                    continue
-                }
+                // Clean up any existing toggle comments
+                document.replaceString(lineStart, lineEnd, text.replaceFirst(REPLACE, ""))
+
+                if (toggleCommentsOff) continue
 
                 // If the line is blank, just insert a blank comment
                 if (text.trim().isEmpty()) {
@@ -83,6 +81,9 @@ class PreprocessorCommentToggleAction  : AnAction() {
                 if (indent >= startIndent) {
                     document.replaceString(lineStart, lineEnd,
                         text.replaceFirst(spaces, spacedComment))
+                } else {
+                    document.replaceString(lineStart, lineEnd,
+                        spacedComment + text.trimStart())
                 }
             }
         }
