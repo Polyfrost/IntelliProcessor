@@ -120,31 +120,42 @@ class PreprocessorConditions private constructor(
             return null
         }
 
-        private val BOOLEAN_SPLITTER = Regex("""\s*(&&|\|\||[^&|]+)\s*""")
-
         private fun evaluateBooleanConditions(conditions: String, currentVersion: PreprocessorVersion): Boolean? {
             // Multiple conditions separated by && or ||
             if (conditions.contains("||") || conditions.contains("&&")) {
-                val tokens = BOOLEAN_SPLITTER.findAll(conditions).map { it.groupValues[1] }.toList()
-                var result = evaluateCondition(tokens[0], currentVersion)
-                    ?: return logAndNull("Could not evaluate condition: ${tokens[0]}")
-                var i = 1
-                while (i < tokens.size) {
-                    val op = tokens[i]
-                    val next = evaluateCondition(tokens[i + 1], currentVersion)
-                        ?: return logAndNull("Could not evaluate condition: ${tokens[i + 1]}")
-                    result = when (op) {
-                        "&&" -> result && next
-                        "||" -> result || next
-                        else -> return logAndNull("op wasn't && or || in: $conditions") // Shouldn't occur
-                    }
-                    i += 2
-                }
-                return result
+                return evaluateOrConditions(conditions, currentVersion)
             }
 
             // Single condition
             return evaluateCondition(conditions, currentVersion)
+        }
+
+        private fun evaluateOrConditions(conditionRaw: String, currentVersion: PreprocessorVersion): Boolean? {
+            val conditions = conditionRaw.split("||")
+            if (conditions.size == 1) return evaluateAndConditions(conditionRaw, currentVersion)
+
+            var i = 0
+            while (i < conditions.size) {
+                val or = evaluateAndConditions(conditions[i], currentVersion)
+                    ?: return logAndNull("Could not evaluate OR sub condition: ${conditions[i]}")
+                if (or) return true
+                i++
+            }
+            return false
+        }
+
+        private fun evaluateAndConditions(conditionRaw: String, currentVersion: PreprocessorVersion): Boolean? {
+            val conditions = conditionRaw.split("&&")
+            if (conditions.size == 1) return evaluateCondition(conditionRaw, currentVersion)
+
+            var i = 0
+            while (i < conditions.size) {
+                val and = evaluateCondition(conditions[i], currentVersion)
+                    ?: return logAndNull("Could not evaluate AND sub condition: ${conditions[i]}")
+                if (!and) return false
+                i++
+            }
+            return true
         }
 
         private fun evaluateCondition(conditionRaw: String, currentVersion: PreprocessorVersion): Boolean? {
