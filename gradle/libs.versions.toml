@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.2.0"
-intellij-ide = "2023.3"
+intellij-ide = "2024.3.5"
 intellij-plugin = "2.10.5"
 junit = "5.10.2"
 changelog = "2.2.1"
