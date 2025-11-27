@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity(libs.versions.intellij.ide, useInstaller = false)
+        intellijIdeaCommunity(libs.versions.intellij.ide)
         pluginVerifier()
 
         // Required
