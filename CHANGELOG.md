@@ -25,6 +25,7 @@
    - #else/elseif/endif directives not having a matching indent with their initial #if directive 
 - Added an option to disable the `//$$ ` insertion on new lines
 <img width="750" height="405" alt="image" src="https://github.com/user-attachments/assets/dc364ea4-3502-45e0-88ec-e12c8c5bee76" />
+
 - Added an action to toggle all preprocessor comments `//$$ ` for the selected lines
 - Added an action to toggle all preprocessor comments `//$$ ` for the entire preprocessor block the caret is within
 - Further keyboard navigation improvements to file jump action
@@ -39,12 +40,14 @@
 ### Updated
 - Changed preprocessor comment styling to have more muted colours & use italics
 <img width="381" height="218" alt="image" src="https://github.com/user-attachments/assets/2009d6aa-baa6-4117-adcf-c53e47941b83" />
+
 - Added support for override files within `versions/<version>/src/` to the "jump to preprocessed files" action.
 - Improved the visual clarity of the list in the "jump to preprocessed files" dialogue window.
 - Improved keyboard navigation of the "jump to preprocessed files" dialogue window.
 - Having ! before a condition identifer is no longer highlighted as an error, e.g. `!FABRIC`
 
-Thank you to [@Traben](https://github.com/Traben-0) for contributing 100% of this update!
+Thank you to [@Traben](https://github.com/Traben-0) for contributing this update!
+
 
 ## [4.0.0] - 2025-07-31
 
