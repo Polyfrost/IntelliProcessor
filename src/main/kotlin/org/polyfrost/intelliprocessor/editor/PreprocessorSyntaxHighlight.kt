@@ -19,11 +19,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor
 import com.intellij.psi.impl.source.tree.PsiCommentImpl
+import com.intellij.ui.JBColor
 import org.polyfrost.intelliprocessor.ALLOWED_FILE_TYPES
 import org.polyfrost.intelliprocessor.Scope
 import org.polyfrost.intelliprocessor.config.PluginSettings
-import java.util.ArrayDeque
-import java.util.Locale
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.toPreprocessorIntOrNull
+import java.awt.Color
+import java.util.*
 
 val SCHEME = EditorColorsManager.getInstance().globalScheme
 
@@ -35,16 +37,23 @@ fun TextAttributes.fade(): TextAttributes {
         val r = c.red + (COMMENT_COLOR.red - c.red) / 2
         val g = c.green + (COMMENT_COLOR.green - c.green) / 2
         val b = c.blue + (COMMENT_COLOR.blue - c.blue) / 2
-        java.awt.Color(r, g, b)
+        Color(r, g, b)
     }
     return this
+}
+
+fun fadedItalic(color: Color? = null): TextAttributes {
+    val attributes = TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), ITALIC_ATTRIBUTE)
+    if (color != null) attributes.foregroundColor = color
+    return attributes.fade()
 }
 
 val BOLD_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.BOLD)
 val ITALIC_ATTRIBUTE = TextAttributes(null, null, null, null, java.awt.Font.ITALIC)
 
 val DIRECTIVE_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.KEYWORD
-val DIRECTIVE_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(DIRECTIVE_COLOR), ITALIC_ATTRIBUTE).fade()
+val DIRECTIVE_ATTRIBUTES_NESTED = listOf(null, JBColor.YELLOW, JBColor.GREEN, JBColor.CYAN, JBColor.BLUE, JBColor.MAGENTA)
+    .map { fadedItalic(it) }
 val DIRECTIVE_TYPE = HighlightInfoType.HighlightInfoTypeImpl(HighlightSeverity.INFORMATION, DIRECTIVE_COLOR)
 val IDENTIFIER_COLOR: TextAttributesKey = DefaultLanguageHighlighterColors.IDENTIFIER
 val IDENTIFIER_ATTRIBUTES: TextAttributes = TextAttributes.merge(SCHEME.getAttributes(IDENTIFIER_COLOR), BOLD_ATTRIBUTE).fade()
@@ -71,6 +80,9 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
 
     private val doNestedIfIdentWarn get() = PluginSettings.instance.inspectionHighlightNonIndentedNestedIfs
     private val doIdentMatchWarn get() = PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents
+    private val colorNestedIndents get() = PluginSettings.instance.colorNestedPreprocessorComments
+    private val colorNestedIndentsOnlyIfInLine get() = PluginSettings.instance.colorNestedPreprocessorCommentsOnlyOnSameIndent
+    private val doSpacingWarn get() = PluginSettings.instance.inspectionRequireJavaKotlinSpacingInConditions
 
     override fun suitableForFile(file: PsiFile): Boolean {
         return file.fileType.name.uppercase(Locale.ROOT) in ALLOWED_FILE_TYPES
@@ -107,8 +119,18 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
         return true
     }
 
+    fun nonPreprocessorElement(element: PsiElement) {
+        if (indentStack.isNotEmpty()) {
+            val indent = indentGetter(element)
+            if (indentStack.peekFirst() > indent) {
+                fail(element, "Content of preprocessor block is not indented the same or more than the containing preprocessor comment, this may not get processed correctly!")
+            }
+        }
+    }
+
     override fun visit(element: PsiElement) {
         if (element !is PsiCommentImpl) {
+            nonPreprocessorElement(element)
             return
         }
 
@@ -159,18 +181,16 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             stack.pop()
         }
 
-        if (doNestedIfIdentWarn || doIdentMatchWarn) {
-            val indent = indentGetter(element)
-            val previousIndent = indentStack.peekFirst()
-            if (directive == "if") {
-                if (doNestedIfIdentWarn && indent <= (previousIndent ?: -1)) {
-                    warn(element, "\"$directive\" is not indented more than it's outer \"if\" block (Code clarity)")
-                }
-                indentStack.push(indent)
-            } else if (directive == "elseif") {
-                if (doIdentMatchWarn && indent != (previousIndent ?: -1)) {
-                    warn(element, "\"$directive\" is not indented the same as it's starting \"if\" (Code clarity)")
-                }
+        val indent = indentGetter(element)
+        val previousIndent = indentStack.peekFirst()
+        if (directive == "if") {
+            if (doNestedIfIdentWarn && indent <= (previousIndent ?: -1)) {
+                warn(element, "\"$directive\" is not indented more than it's outer \"if\" block (Code clarity)")
+            }
+            indentStack.push(indent)
+        } else if (directive == "elseif") {
+            if (doIdentMatchWarn && indent != (previousIndent ?: -1)) {
+                warn(element, "\"$directive\" is not indented the same as it's starting \"if\" (Code clarity)")
             }
         }
 
@@ -191,6 +211,8 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
 
             EXPR_PATTERN.matchEntire(trimmed)?.let { m ->
                 m.groups[1]?.toHighlight(element, position)?.let(holder::add)
+                if (doSpacingWarn && !trimmed.contains(" ${m.groups[2]?.value} "))
+                    warn(element, "Operator \"${m.groups[2]?.value}\" should be surrounded by spaces for clarity & consistency with Java / Kotlin styling.")
                 m.groups[3]?.toHighlight(element, position)?.let(holder::add)
             } ?: run {
                 IDENTIFIER_PATTERN.matchEntire(trimmed)?.let { idMatch ->
@@ -201,14 +223,15 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
     }
 
     private fun handleIfDef(element: PsiCommentImpl, segments: List<String>, prefixLength: Int) {
+
+        val indent = indentGetter(element)
         if (doNestedIfIdentWarn) {
-            val indent = indentGetter(element)
             val previousIndent = indentStack.peekFirst()
             if (indent <= (previousIndent ?: -1)) {
                 warn(element, "\"ifdef\" is not indented more than it's outer \"if\" block (Code clarity)")
             }
-            indentStack.push(indent)
         }
+        indentStack.push(indent)
 
         stack.push(Scope.IF)
         holder.add("ifdef".toDirectiveHighlight(element, prefixLength))
@@ -263,11 +286,11 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
             if (indent != (previousIndent ?: -1)) {
                 warn(element, "\"endif\" is not indented the same as it's starting \"if\" (Code clarity)")
             }
-            indentStack.pop()
-        } else if (doNestedIfIdentWarn) indentStack.pop()
+        }
 
         stack.pop()
         holder.add("endif".toDirectiveHighlight(element, prefixLength))
+        indentStack.pop()
 
         if (segments.size > 1) {
             fail(element, "\"endif\" should not have arguments")
@@ -306,6 +329,16 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
         highlightType(element, message, eol, HighlightInfoType.WEAK_WARNING)
 
     private fun highlightType(element: PsiElement, message: String, eol: Boolean = false, type: HighlightInfoType) {
+        for (i in 0..holder.size() - 1) {
+            val info = holder.get(i)
+            if (info.startOffset == element.textRange.startOffset
+                && info.description == message
+                && info.type == type
+            ) {
+                return // Avoid repeating the same highlight for each element
+            }
+        }
+
         val builder = HighlightInfo.newHighlightInfo(type)
             .descriptionAndTooltip(message)
 
@@ -320,8 +353,8 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
 
     private fun MatchGroup.toHighlight(element: PsiCommentImpl, offset: Int): HighlightInfo? {
         val trimmed = value.trim()
-        val type = if (trimmed.toIntOrNull() != null) NUMBER_TYPE else IDENTIFIER_TYPE
-        val attr = if (trimmed.toIntOrNull() != null) NUMBER_ATTRIBUTES else IDENTIFIER_ATTRIBUTES
+        val type = if (trimmed.toPreprocessorIntOrNull() != null) NUMBER_TYPE else IDENTIFIER_TYPE
+        val attr = if (trimmed.toPreprocessorIntOrNull() != null) NUMBER_ATTRIBUTES else IDENTIFIER_ATTRIBUTES
         return HighlightInfo.newHighlightInfo(type)
             .textAttributes(attr)
             .range(
@@ -333,7 +366,16 @@ class PreprocessorSyntaxHighlight(private val project: Project) : HighlightVisit
 
     private fun String.toDirectiveHighlight(element: PsiCommentImpl, offset: Int): HighlightInfo? =
         HighlightInfo.newHighlightInfo(DIRECTIVE_TYPE)
-            .textAttributes(DIRECTIVE_ATTRIBUTES)
+            .textAttributes(DIRECTIVE_ATTRIBUTES_NESTED.let {
+                if (colorNestedIndents) {
+                    val amount = if (colorNestedIndentsOnlyIfInLine) {
+                        indentStack.count { i -> i == indentGetter(element)} - 1
+                    } else {
+                        indentStack.size - 1
+                    }.coerceAtLeast(0)
+                    it[amount % it.size]
+                } else it[0]
+            })
             .range(element.startOffset + offset, element.startOffset + offset + 1 + length)
             .create()
 

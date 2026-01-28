@@ -22,7 +22,7 @@ class PreprocessorImport : ImportOptimizer {
         if (!hasPreprocessorDirectives(imports)) {
             return LanguageImportStatements.INSTANCE
                 .allForLanguage(file.language)
-                .first { it !is JavaImportOptimizer }
+                .first { it is JavaImportOptimizer }
                 .processFile(file)
         }
 

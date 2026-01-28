@@ -15,7 +15,7 @@ class PreprocessorVersion private constructor(val mc: Int, val loader: String) {
         val NULL = PreprocessorVersion(0, "null")
 
         val String.preprocessorVersion: PreprocessorVersion? get() {
-            val int = makeComparable(this) ?: return null
+            val int = sugarToInt(this) ?: return null
             val loader = split("-").getOrNull(1) ?: return null
             return PreprocessorVersion(int, loader)
         }
@@ -53,8 +53,17 @@ class PreprocessorVersion private constructor(val mc: Int, val loader: String) {
             return Files.readString(versionFile).trim()
         }
 
+        /**
+         * Converts a preprocessor version string to an integer.
+         * Supports both sugar version format (e.g., `1.16.5`) and integer format (e.g., `11605`).
+         */
+        fun String.toPreprocessorIntOrNull() : Int? =
+            if (this.contains(".")) sugarToInt(this)
+            else this.toIntOrNull()
+
+
         private val regex = "(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?".toRegex()
-        private fun makeComparable(version: String): Int? {
+        private fun sugarToInt(version: String): Int? {
             val match = regex.find(version) ?: return null
             val groups = match.groups
 

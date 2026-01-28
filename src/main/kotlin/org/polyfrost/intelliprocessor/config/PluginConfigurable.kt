@@ -17,7 +17,10 @@ class PluginConfigurable : Configurable {
     private lateinit var inspectionHighlightCommentsNotMatchingIfIndentsCheckbox: JCheckBox
     private lateinit var hideUnmatchedVersionsCheckbox: JCheckBox
     private lateinit var addPreprocessorCommentOnEnterCheckbox: JCheckBox
-
+    private lateinit var colorNestedPreprocessorCommentsCheckbox: JCheckBox
+    private lateinit var colorNestedPreprocessorCommentsOnlyOnSameIndentCheckbox: JCheckBox
+    private lateinit var inspectionHighlightContentNotMatchingIfIndentsCheckbox: JCheckBox
+    private lateinit var inspectionRequireJavaKotlinSpacingInConditionsCheckbox: JCheckBox
 
     override fun getDisplayName(): String = "IntelliProcessor"
 
@@ -57,6 +60,19 @@ class PluginConfigurable : Configurable {
         addPreprocessorCommentOnEnterCheckbox = JCheckBox("Add preprocessor comment '//$$ ' automatically to new lines in a disabled preprocessor block")
             .tooltip("When pressing Enter inside a disabled preprocessor block, automatically adds a preprocessor comment '//$$ ' to the new line.")
 
+        colorNestedPreprocessorCommentsCheckbox = JCheckBox("Color nested preprocessor comments differently")
+            .tooltip("Colors preprocessor comments inside nested preprocessor blocks with a different color for better visibility.")
+
+        colorNestedPreprocessorCommentsOnlyOnSameIndentCheckbox = JCheckBox("Only recolor nested preprocessor comments when in-line with each other")
+            .tooltip("Only applies the different color to nested preprocessor comments when their indents align.")
+
+        inspectionHighlightContentNotMatchingIfIndentsCheckbox = JCheckBox("Highlight lines indented less than their \"if\"'s indent")
+                .tooltip("Highlights lines of code inside preprocessor blocks that are indented less than the corresponding \"if\" directive.\n" +
+                    "This does break preprocessing.")
+
+        inspectionRequireJavaKotlinSpacingInConditionsCheckbox = JCheckBox("Highlight non-standard Java / Kotlin spacing around operators in preprocessor conditions")
+            .tooltip("Highlights improper use of spaces around operators in preprocessor conditions for improved readability.")
+
         // Arrange components
 
         fun titledBlock(str: String, block: JPanel.() -> Unit): JPanel = JPanel().apply {
@@ -78,6 +94,10 @@ class PluginConfigurable : Configurable {
             add(titledBlock("Formatting") {
                 add(inspectionHighlightNonIndentedNestedIfsCheckbox)
                 add(inspectionHighlightCommentsNotMatchingIfIndentsCheckbox)
+                add(inspectionHighlightContentNotMatchingIfIndentsCheckbox)
+                add(colorNestedPreprocessorCommentsCheckbox)
+                add(colorNestedPreprocessorCommentsOnlyOnSameIndentCheckbox)
+                add(inspectionRequireJavaKotlinSpacingInConditionsCheckbox)
             })
 
             add(titledBlock("Jump To Pre-Processed File Action") {
@@ -104,6 +124,10 @@ class PluginConfigurable : Configurable {
                 || inspectionHighlightCommentsNotMatchingIfIndentsCheckbox.isSelected != PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents
                 || hideUnmatchedVersionsCheckbox.isSelected != PluginSettings.instance.hideUnmatchedVersions
                 || addPreprocessorCommentOnEnterCheckbox.isSelected != PluginSettings.instance.addPreprocessorCommentOnEnter
+                || colorNestedPreprocessorCommentsCheckbox.isSelected != PluginSettings.instance.colorNestedPreprocessorComments
+                || colorNestedPreprocessorCommentsOnlyOnSameIndentCheckbox.isSelected != PluginSettings.instance.colorNestedPreprocessorCommentsOnlyOnSameIndent
+                || inspectionHighlightContentNotMatchingIfIndentsCheckbox.isSelected != PluginSettings.instance.inspectionHighlightContentNotMatchingIfIndents
+                || inspectionRequireJavaKotlinSpacingInConditionsCheckbox.isSelected != PluginSettings.instance.inspectionRequireJavaKotlinSpacingInConditions
 
     override fun apply() {
         PluginSettings.instance.foldAllBlocksByDefault = foldAllBlocksByDefaultCheckbox.isSelected
@@ -112,6 +136,10 @@ class PluginConfigurable : Configurable {
         PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents = inspectionHighlightCommentsNotMatchingIfIndentsCheckbox.isSelected
         PluginSettings.instance.hideUnmatchedVersions = hideUnmatchedVersionsCheckbox.isSelected
         PluginSettings.instance.addPreprocessorCommentOnEnter = addPreprocessorCommentOnEnterCheckbox.isSelected
+        PluginSettings.instance.colorNestedPreprocessorComments = colorNestedPreprocessorCommentsCheckbox.isSelected
+        PluginSettings.instance.colorNestedPreprocessorCommentsOnlyOnSameIndent = colorNestedPreprocessorCommentsOnlyOnSameIndentCheckbox.isSelected
+        PluginSettings.instance.inspectionHighlightContentNotMatchingIfIndents = inspectionHighlightContentNotMatchingIfIndentsCheckbox.isSelected
+        PluginSettings.instance.inspectionRequireJavaKotlinSpacingInConditions = inspectionRequireJavaKotlinSpacingInConditionsCheckbox.isSelected
     }
 
     override fun reset() {
@@ -121,5 +149,9 @@ class PluginConfigurable : Configurable {
         inspectionHighlightCommentsNotMatchingIfIndentsCheckbox.isSelected = PluginSettings.instance.inspectionHighlightCommentsNotMatchingIfIndents
         hideUnmatchedVersionsCheckbox.isSelected = PluginSettings.instance.hideUnmatchedVersions
         addPreprocessorCommentOnEnterCheckbox.isSelected = PluginSettings.instance.addPreprocessorCommentOnEnter
+        colorNestedPreprocessorCommentsCheckbox.isSelected = PluginSettings.instance.colorNestedPreprocessorComments
+        colorNestedPreprocessorCommentsOnlyOnSameIndentCheckbox.isSelected = PluginSettings.instance.colorNestedPreprocessorCommentsOnlyOnSameIndent
+        inspectionHighlightContentNotMatchingIfIndentsCheckbox.isSelected = PluginSettings.instance.inspectionHighlightContentNotMatchingIfIndents
+        inspectionRequireJavaKotlinSpacingInConditionsCheckbox.isSelected = PluginSettings.instance.inspectionRequireJavaKotlinSpacingInConditions
     }
 }

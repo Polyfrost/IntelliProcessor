@@ -11,10 +11,14 @@ import com.intellij.openapi.components.service
 class PluginSettings : PersistentStateComponent<PluginSettings> {
     var foldAllBlocksByDefault: Boolean = false
     var foldInactiveBlocksByDefault: Boolean = true
-    var inspectionHighlightNonIndentedNestedIfs: Boolean = true
+    var inspectionHighlightNonIndentedNestedIfs: Boolean = false
     var inspectionHighlightCommentsNotMatchingIfIndents: Boolean = true
     var hideUnmatchedVersions: Boolean = false
     var addPreprocessorCommentOnEnter = true
+    var colorNestedPreprocessorComments = true
+    var colorNestedPreprocessorCommentsOnlyOnSameIndent = false
+    var inspectionHighlightContentNotMatchingIfIndents = true
+    var inspectionRequireJavaKotlinSpacingInConditions = false
 
     override fun getState(): PluginSettings = this
 
@@ -25,6 +29,10 @@ class PluginSettings : PersistentStateComponent<PluginSettings> {
         this.inspectionHighlightCommentsNotMatchingIfIndents = state.inspectionHighlightCommentsNotMatchingIfIndents
         this.hideUnmatchedVersions = state.hideUnmatchedVersions
         this.addPreprocessorCommentOnEnter = state.addPreprocessorCommentOnEnter
+        this.colorNestedPreprocessorComments = state.colorNestedPreprocessorComments
+        this.colorNestedPreprocessorCommentsOnlyOnSameIndent = state.colorNestedPreprocessorCommentsOnlyOnSameIndent
+        this.inspectionHighlightContentNotMatchingIfIndents = state.inspectionHighlightContentNotMatchingIfIndents
+        this.inspectionRequireJavaKotlinSpacingInConditions = state.inspectionRequireJavaKotlinSpacingInConditions
     }
 
     companion object {

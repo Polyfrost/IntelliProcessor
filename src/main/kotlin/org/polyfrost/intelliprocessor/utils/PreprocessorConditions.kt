@@ -3,6 +3,7 @@ package org.polyfrost.intelliprocessor.utils
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.startOffset
+import org.polyfrost.intelliprocessor.utils.PreprocessorVersion.Companion.toPreprocessorIntOrNull
 
 
 class PreprocessorConditions private constructor(
@@ -176,7 +177,7 @@ class PreprocessorConditions private constructor(
             val (operator, rhsStr) = match.destructured
 
 
-            val rhs = rhsStr.toIntOrNull()
+            val rhs = rhsStr.toPreprocessorIntOrNull()
                 ?: return logAndNull("Could not evaluate version number in MC condition: $condition")
 
             val compare = currentVersion.mc
