@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>org.polyfrost.sorbet.intelliprocessor</id>
     <name>IntelliProcessor</name>
-    <vendor url="https://github.com/Polyfrost">Polyfrost</vendor>
+    <vendor url="https://github.com/vendor/traben">Traben</vendor>
 
     <!-- Tell the IDE that we support Kotlin K2 mode, this cannot just be in the kotlin-plugin.xml -->
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
