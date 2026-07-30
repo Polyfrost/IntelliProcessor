@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-07-30
+
 ### Added
 
 - Option to differently tint nested preprocessor blocks for better visibility
@@ -123,10 +125,11 @@
 
 - Updated IntelliJ version and refactored code
 
-[Unreleased]: https://github.com/Polyfrost/IntelliProcessor/compare/v4.1.0...HEAD
-[4.1.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v4.0.0...v4.1.0
-[4.0.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v3.1.0...v4.0.0
-[3.1.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v3.0.0...v3.1.0
-[3.0.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v2.1.0...v3.0.0
-[2.1.0]: https://github.com/Polyfrost/IntelliProcessor/compare/v2.0.0...v2.1.0
-[2.0.0]: https://github.com/Polyfrost/IntelliProcessor/commits/v2.0.0
+[Unreleased]: https://github.com/Traben-0/IntelliProcessor/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/Traben-0/IntelliProcessor/compare/v4.1.0...v4.2.0
+[4.1.0]: https://github.com/Traben-0/IntelliProcessor/compare/v4.0.0...v4.1.0
+[4.0.0]: https://github.com/Traben-0/IntelliProcessor/compare/v3.1.0...v4.0.0
+[3.1.0]: https://github.com/Traben-0/IntelliProcessor/compare/v3.0.0...v3.1.0
+[3.0.0]: https://github.com/Traben-0/IntelliProcessor/compare/v2.1.0...v3.0.0
+[2.1.0]: https://github.com/Traben-0/IntelliProcessor/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/Traben-0/IntelliProcessor/commits/v2.0.0
