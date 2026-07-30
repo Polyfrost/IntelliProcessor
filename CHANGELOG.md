@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- Option to differently tint nested preprocessor blocks for better visibility
+- Optional formatting warning when operator format doesn't match java kotlin styling
+
+### Fixed
+
+- Fixed condition checks and highlighting for sugared version numbering e.g. `1.21.6` as opposed to `12106`
+- Fixed a stack overflow error
+
+### Updated
+
+- Icon, branding, and links, for project owner transfer to [Traben-0](https://github.com/Traben-0)
+
 ## [4.1.0] - 2025-11-27
 
 ### Added
